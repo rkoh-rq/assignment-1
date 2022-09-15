@@ -7,7 +7,7 @@ using namespace std;
 int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
 
 struct keyStruct{
-    unsigned int value;
+    int value;
     vector <void*> vector;
 };
 class Node {
@@ -31,27 +31,27 @@ public:
 // BP tree
 class BPTree {
 	Node* root;
-	void insertInternal(keyStruct,Node*,Node*);
+	void insertInternal(int,Node*,Node*);
 	Node* findParent(Node*, Node*);
 
 public:
 	BPTree(){
         root = NULL;
     }
-	void search(unsigned int);
-	void insert(unsigned int);
+	void search(int);
+	void insert(int);
 	void display(Node*);
 	Node* getRoot();
 };
 
-void BPTree::insert(unsigned int x)
+void BPTree::insert(int x)
 {
 
 	// If root is null then return
 	// newly created node
 	if (root == NULL) {
 		root = new Node;
-		root->key[0] = x;
+		root->key[0].value = x;
 		root->isLeaf = true;
 		root->size = 1;
 	}
@@ -63,28 +63,23 @@ void BPTree::insert(unsigned int x)
 
 		// Till cursor reaches the
 		// leaf node
-		while (cursor->isLeaf
-			== false) {
+		while (cursor->isLeaf == false) {
 
 			parent = cursor;
 
-			for (int i = 0;
-				i < cursor->size;
-				i++) {
+			for (int i = 0; i < cursor->size; i++) {
 
 				// If found the position
 				// where we have to insert
 				// node
-				if (x < cursor->key[i]) {
-					cursor
-						= cursor->ptr[i];
+				if (x < cursor->key[i].value) {
+					cursor = cursor->ptr[i];
 					break;
 				}
 
 				// If reaches the end
 				if (i == cursor->size - 1) {
-					cursor
-						= cursor->ptr[i + 1];
+					cursor	= cursor->ptr[i + 1];
 					break;
 				}
 			}
@@ -92,22 +87,18 @@ void BPTree::insert(unsigned int x)
 
 		if (cursor->size < MAX) {
 			int i = 0;
-			while (x > cursor->key[i]
-				&& i < cursor->size) {
+			while (x > cursor->key[i].value && i < cursor->size) {
 				i++;
 			}
 
-			for (int j = cursor->size;
-				j > i; j--) {
-				cursor->key[j]
-					= cursor->key[j - 1];
+			for (int j = cursor->size; j > i; j--) {
+				cursor->key[j].value = cursor->key[j - 1].value;
 			}
 
-			cursor->key[i] = x;
+			cursor->key[i].value = x;
 			cursor->size++;
 
-			cursor->ptr[cursor->size]
-				= cursor->ptr[cursor->size - 1];
+			cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
 			cursor->ptr[cursor->size - 1] = NULL;
 		}
 
@@ -121,56 +112,44 @@ void BPTree::insert(unsigned int x)
 			// Update cursor to virtual
 			// node created
 			for (int i = 0; i < MAX; i++) {
-				virtualNode[i]
-					= cursor->key[i];
+				virtualNode[i]	= cursor->key[i].value;
 			}
 			int i = 0, j;
 
 			// Traverse to find where the new
 			// node is to be inserted
-			while (x > virtualNode[i]
-				&& i < MAX) {
+			while (x > virtualNode[i] && i < MAX) {
 				i++;
 			}
 
 			// Update the current virtual
 			// Node to its previous
-			for (int j = MAX + 1;
-				j > i; j--) {
-				virtualNode[j]
-					= virtualNode[j - 1];
+			for (int j = MAX + 1; j > i; j--) {
+				virtualNode[j] = virtualNode[j - 1];
 			}
 
 			virtualNode[i] = x;
 			newLeaf->isLeaf = true;
 
 			cursor->size = (MAX + 1) / 2;
-			newLeaf->size
-				= MAX + 1 - (MAX + 1) / 2;
+			newLeaf->size = MAX + 1 - (MAX + 1) / 2;
 
-			cursor->ptr[cursor->size]
-				= newLeaf;
+			cursor->ptr[cursor->size] = newLeaf;
 
-			newLeaf->ptr[newLeaf->size]
-				= cursor->ptr[MAX];
+			newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
 
 			cursor->ptr[MAX] = NULL;
 
 			// Update the current virtual
 			// Node's key to its previous
-			for (i = 0;
-				i < cursor->size; i++) {
-				cursor->key[i]
-					= virtualNode[i];
+			for (i = 0; i < cursor->size; i++) {
+				cursor->key[i].value = virtualNode[i];
 			}
 
 			// Update the newLeaf key to
 			// virtual Node
-			for (i = 0, j = cursor->size;
-				i < newLeaf->size;
-				i++, j++) {
-				newLeaf->key[i]
-					= virtualNode[j];
+			for (i = 0, j = cursor->size;i < newLeaf->size;i++, j++) {
+				newLeaf->key[i].value = virtualNode[j];
 			}
 
 			// If cursor is the root node
@@ -181,7 +160,7 @@ void BPTree::insert(unsigned int x)
 
 				// Update rest field of
 				// B+ Tree Node
-				newRoot->key[0] = newLeaf->key[0];
+				newRoot->key[0].value = newLeaf->key[0].value;
 				newRoot->ptr[0] = cursor;
 				newRoot->ptr[1] = newLeaf;
 				newRoot->isLeaf = false;
@@ -189,12 +168,9 @@ void BPTree::insert(unsigned int x)
 				root = newRoot;
 			}
 			else {
-
 				// Recursive Call for
 				// insert in internal
-				insertInternal(newLeaf->key[0],
-							parent,
-							newLeaf);
+				insertInternal(newLeaf->key[0].value, parent,newLeaf);
 			}
 		}
 	}
@@ -221,7 +197,7 @@ void BPTree::search(int x)
 
 				// If the element to be
 				// found is not present
-				if (x < cursor->key[i]) {
+				if (x < cursor->key[i].value) {
 					cursor = cursor->ptr[i];
 					break;
 				}
@@ -241,7 +217,7 @@ void BPTree::search(int x)
 			i < cursor->size; i++) {
 
 			// If found then return
-			if (cursor->key[i] == x) {
+			if (cursor->key[i].value == x) {
 				cout << "Found\n";
 				return;
 			}
@@ -265,31 +241,26 @@ void BPTree::insertInternal(int x,
 
 		// Traverse the child node
 		// for current cursor node
-		while (x > cursor->key[i]
-			&& i < cursor->size) {
+		while (x > cursor->key[i].value && i < cursor->size) {
 			i++;
 		}
 
 		// Traverse the cursor node
 		// and update the current key
 		// to its previous node key
-		for (int j = cursor->size;
-			j > i; j--) {
+		for (int j = cursor->size; j > i; j--) {
 
-			cursor->key[j]
-				= cursor->key[j - 1];
+			cursor->key[j].value = cursor->key[j - 1].value;
 		}
 
 		// Traverse the cursor node
 		// and update the current ptr
 		// to its previous node ptr
-		for (int j = cursor->size + 1;
-			j > i + 1; j--) {
-			cursor->ptr[j]
-				= cursor->ptr[j - 1];
+		for (int j = cursor->size + 1; j > i + 1; j--) {
+			cursor->ptr[j] = cursor->ptr[j - 1];
 		}
 
-		cursor->key[i] = x;
+		cursor->key[i].value = x;
 		cursor->size++;
 		cursor->ptr[i + 1] = child;
 	}
@@ -305,7 +276,7 @@ void BPTree::insertInternal(int x,
 		// Insert the current list key
 		// of cursor node to virtualKey
 		for (int i = 0; i < MAX; i++) {
-			virtualKey[i] = cursor->key[i];
+			virtualKey[i] = cursor->key[i].value;
 		}
 
 		// Insert the current list ptr
@@ -318,19 +289,15 @@ void BPTree::insertInternal(int x,
 
 		// Traverse to find where the new
 		// node is to be inserted
-		while (x > virtualKey[i]
-			&& i < MAX) {
+		while (x > virtualKey[i] && i < MAX) {
 			i++;
 		}
 
 		// Traverse the virtualKey node
 		// and update the current key
 		// to its previous node key
-		for (int j = MAX + 1;
-			j > i; j--) {
-
-			virtualKey[j]
-				= virtualKey[j - 1];
+		for (int j = MAX + 1;j > i; j--) {
+            virtualKey[j] = virtualKey[j - 1];
 		}
 
 		virtualKey[i] = x;
@@ -338,37 +305,25 @@ void BPTree::insertInternal(int x,
 		// Traverse the virtualKey node
 		// and update the current ptr
 		// to its previous node ptr
-		for (int j = MAX + 2;
-			j > i + 1; j--) {
-			virtualPtr[j]
-				= virtualPtr[j - 1];
+		for (int j = MAX + 2; j > i + 1; j--) {
+			virtualPtr[j] = virtualPtr[j - 1];
 		}
 
 		virtualPtr[i + 1] = child;
 		newInternal->isLeaf = false;
 
-		cursor->size
-			= (MAX + 1) / 2;
+		cursor->size = (MAX + 1) / 2;
 
-		newInternal->size
-			= MAX - (MAX + 1) / 2;
+		newInternal->size = MAX - (MAX + 1) / 2;
 
 		// Insert new node as an
 		// internal node
-		for (i = 0, j = cursor->size + 1;
-			i < newInternal->size;
-			i++, j++) {
-
-			newInternal->key[i]
-				= virtualKey[j];
+		for (i = 0, j = cursor->size + 1;i < newInternal->size;i++, j++) {
+            newInternal->key[i].value = virtualKey[j];
 		}
 
-		for (i = 0, j = cursor->size + 1;
-			i < newInternal->size + 1;
-			i++, j++) {
-
-			newInternal->ptr[i]
-				= virtualPtr[j];
+		for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
+            newInternal->ptr[i]	= virtualPtr[j];
 		}
 
 		// If cursor is the root node
@@ -378,8 +333,7 @@ void BPTree::insertInternal(int x,
 			Node* newRoot = new Node;
 
 			// Update key value
-			newRoot->key[0]
-				= cursor->key[cursor->size];
+			newRoot->key[0].value = cursor->key[cursor->size].value;
 
 			// Update rest field of
 			// B+ Tree Node
@@ -394,30 +348,24 @@ void BPTree::insertInternal(int x,
 
 			// Recursive Call to insert
 			// the data
-			insertInternal(cursor->key[cursor->size],
-						findParent(root,
-									cursor),
-						newInternal);
+			insertInternal(cursor->key[cursor->size].value, findParent(root,cursor),newInternal);
 		}
 	}
 }
 
 // Function to find the parent node
-Node* BPTree::findParent(Node* cursor,
-						Node* child)
+Node* BPTree::findParent(Node* cursor, Node* child)
 {
 	Node* parent;
 
 	// If cursor reaches the end of Tree
-	if (cursor->isLeaf
-		|| (cursor->ptr[0])->isLeaf) {
+	if (cursor->isLeaf || (cursor->ptr[0])->isLeaf) {
 		return NULL;
 	}
 
 	// Traverse the current node with
 	// all its child
-	for (int i = 0;
-		i < cursor->size + 1; i++) {
+	for (int i = 0; i < cursor->size + 1; i++) {
 
 		// Update the parent for the
 		// child Node
@@ -429,9 +377,7 @@ Node* BPTree::findParent(Node* cursor,
 		// Else recursively traverse to
 		// find child node
 		else {
-			parent
-				= findParent(cursor->ptr[i],
-							child);
+			parent = findParent(cursor->ptr[i], child);
 
 			// If parent is found, then
 			// return that parent node
@@ -439,7 +385,6 @@ Node* BPTree::findParent(Node* cursor,
 				return parent;
 		}
 	}
-
 	// Return parent node
 	return parent;
 }
@@ -451,14 +396,14 @@ Node* BPTree::getRoot()
 }
 // Driver Code
 int main()
-{
+{   
+    BPTree node;
 	// Create B+ Tree
 	node.insert(6);
 	node.insert(16);
 	node.insert(26);
 	node.insert(36);
 	node.insert(46);
-
 	// Function Call to search node
 	// with value 16
 	node.search(16);
