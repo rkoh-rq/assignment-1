@@ -6,13 +6,14 @@
 using namespace std;
 int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
 
-struct keyStruct{
+struct record {
     int value;
     vector <void*> vector;
 };
+
 class Node {
 	bool isLeaf;
-    keyStruct *key;
+    record *key;
 	int size;
 	Node** ptr;
 	friend class BPTree;
@@ -20,9 +21,9 @@ class Node {
 public:
 	Node()
     {
-    isLeaf = true;
-	key = new keyStruct[MAX];
-	ptr = new Node*[MAX + 1];
+        isLeaf = true;
+	    key = new record[MAX];
+	    ptr = new Node*[MAX + 1];
     }
 };
 
@@ -38,10 +39,13 @@ public:
 	BPTree(){
         root = NULL;
     }
-	void search(int);
+	void search(int,int);
 	void insert(int);
 	void display(Node*);
-	Node* getRoot();
+	Node* getRoot()
+    {
+	    return root;
+    };
 };
 
 void BPTree::insert(int x)
@@ -176,9 +180,9 @@ void BPTree::insert(int x)
 	}
 }
 
-void BPTree::search(int x)
+void BPTree::search(int lowerBound, int upperBound)
 {
-
+    bool found = false;
 	// If tree is empty
 	if (root == NULL) {
 		cout << "Tree is empty\n";
@@ -192,12 +196,11 @@ void BPTree::search(int x)
 		// Till we reach leaf node
 		while (cursor->isLeaf == false) {
 
-			for (int i = 0;
-				i < cursor->size; i++) {
+			for (int i = 0; i < cursor->size; i++) {
 
 				// If the element to be
 				// found is not present
-				if (x < cursor->key[i].value) {
+				if (lowerBound < cursor->key[i].value) {
 					cursor = cursor->ptr[i];
 					break;
 				}
@@ -213,32 +216,35 @@ void BPTree::search(int x)
 
 		// Traverse the cursor and find
 		// the node with value x
-		for (int i = 0;
-			i < cursor->size; i++) {
-
+		for (int i = 0; i < cursor->size; i++) {
+            // TODO - change to allow for range queries
 			// If found then return
-			if (cursor->key[i].value == x) {
-				cout << "Found\n";
-				return;
+			if (cursor->key[i].value >= lowerBound && cursor->key[i].value <= upperBound) {
+				cout << cursor->key[i].value;
+                cout << "\n";
+                found = true;
 			}
+            /*if (i == cursor->size - 1) {
+				cursor = cursor->ptr[i + 1];
+			}*/
 		}
-
 		// Else element is not present
-		cout << "Not found\n";
+        if (!found){
+            cout << "Not found\n";
+        }
 	}
 }
 
+
+
 // Function to implement the Insert
 // Internal Operation in B+ Tree
-void BPTree::insertInternal(int x,
-							Node* cursor,
-							Node* child)
+void BPTree::insertInternal(int x,Node* cursor, Node* child)
 {
 
 	// If we doesn't have overflow
 	if (cursor->size < MAX) {
 		int i = 0;
-
 		// Traverse the child node
 		// for current cursor node
 		while (x > cursor->key[i].value && i < cursor->size) {
@@ -388,12 +394,7 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 	// Return parent node
 	return parent;
 }
-
-// Function to get the root Node
-Node* BPTree::getRoot()
-{
-	return root;
-}
+//TODO - make a remove, fix search and have a display
 // Driver Code
 int main()
 {   
@@ -406,6 +407,6 @@ int main()
 	node.insert(46);
 	// Function Call to search node
 	// with value 16
-	node.search(16);
+	node.search(6,36);
 	return 0;
 }
