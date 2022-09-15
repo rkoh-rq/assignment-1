@@ -49,8 +49,8 @@ public:
 };
 
 void BPTree::insert(int x)
-{
-
+{	
+	
 	// If root is null then return
 	// newly created node
 	if (root == NULL) {
@@ -98,7 +98,7 @@ void BPTree::insert(int x)
 			for (int j = cursor->size; j > i; j--) {
 				cursor->key[j].value = cursor->key[j - 1].value;
 			}
-
+			
 			cursor->key[i].value = x;
 			cursor->size++;
 
@@ -219,17 +219,19 @@ void BPTree::search(int lowerBound, int upperBound)
 		for (int i = 0; i < cursor->size; i++) {
             // TODO - change to allow for range queries
 			// If found then return
+			
 			if (cursor->key[i].value >= lowerBound && cursor->key[i].value <= upperBound) {
 				cout << cursor->key[i].value;
                 cout << "\n";
                 found = true;
 			}
-			if (cursor->key[i].value > upperBound){
+			if (cursor->key[i].value >= upperBound){
 				break;
 			}
-			if (i == cursor->size - 1){
+			
+			if (i == cursor->size - 1 && cursor->ptr[i+1] != nullptr){
 				cursor = cursor->ptr[i+1];
-				i = 0;
+				i = -1;
 			}
 		}
 		// Else element is not present
@@ -411,6 +413,6 @@ int main()
 	node.insert(46);
 	// Function Call to search node
 	// with value 16
-	node.search(6,36);
+	node.search(6,47);
 	return 0;
 }
