@@ -52,17 +52,23 @@ struct reviewAddress {
     short int offset; // from which part of memory in block it started 
 };
 
+struct deletedChain
+{
+    reviewAddress deletedAddr;
+    deletedChain* next;
+};
+
 class Storage {
     public:
-        Storage(int disk_size, int block_size); 
+        Storage(std::size_t disk_size, std::size_t block_size); 
         
         // helper functions
         bool check_new_block(); // check if current block_size_used + block_size is more than disk_size
-        reviewAddress record_get_block_add(int record_size); // returns block add to store to 
+        reviewAddress record_get_block_add(); // returns block add to store to 
         // CRUD functions, without update 
-        reviewRecord retrieve_record(reviewAddress ra, int record_size); // retrieve record given reviewAddress and record size
-        bool insert_record(reviewAddress ra, void *record, int record_size); // store record
-        bool remove_record(reviewAddress ra, int record_size); // remove record, return false if error
+        reviewRecord retrieve_record(reviewAddress ra); // retrieve record given reviewAddress and record size
+        bool insert_record(reviewAddress ra, reviewRecord record); // store record
+        bool remove_record(reviewAddress ra); // remove record, return false if error
         // get functions 
         int get_disk_size();
         int get_block_size(); 
@@ -86,5 +92,7 @@ class Storage {
         int block_accessed; // number of blocks accessed
 
         int block_id; // id of block we are pointing to
+        char* start_addr; // starting address
 
+        deletedChain* deleted; // deleted records
 };

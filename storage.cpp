@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
 
-#include "storage_new.h"
+#include "storage.h"
 
 using namespace std; 
 
-Storage::Storage(int disk_size, int block_size){
+std::size_t record_size = sizeof(reviewRecord);
+
+Storage::Storage(std::size_t disk_size, std::size_t block_size){
     this->disk_size = disk_size;
     this->block_size = block_size; 
     this->total_blocks = disk_size/block_size; 
@@ -15,6 +17,9 @@ Storage::Storage(int disk_size, int block_size){
     this->allocated_blocks = 0;
     this->block_accessed = 0; 
     this->block_id = 0;
+
+    this->start_addr = (char*) malloc(disk_size);
+    this->deleted = nullptr;
 }
 
 /*
@@ -50,7 +55,7 @@ int Storage::get_block_id(){
 
 
 /*
-    Check if adding a new block exceeds total disk space.
+    Check if adding a new block exceeds total disk space, and adds a new block if possible.
     Returns true if there is available space, and updates variables to add new block
     Returns false if there is no available space.  
 */
@@ -76,11 +81,19 @@ bool Storage::check_new_block(){
 /*
     Return an allocated block ID to insert into 
 */
-reviewAddress Storage::record_get_block_add(int record_size){
+reviewAddress Storage::record_get_block_add(){
     if (record_size > block_size){
-        // throw some error
+        // this shouldn't happen since the records are meant to be much smaller than blocks
+    }
+
+    if (deleted){
+        // if there are deleted records, add it into the deleted space instead
+        reviewAddress ra = deleted->deletedAddr;
+        deleted = deleted->next;
+        return ra;
     }
     
+    // otherwise, add it to newer blocks
     // if current block not allocated or record exceeds size after adding to existing block, make new block
     if ( (allocated_blocks == 0) || ((internal_block_size_used + record_size) > block_size)){
         bool isSuccessful = check_new_block(); 
@@ -106,12 +119,12 @@ reviewAddress Storage::record_get_block_add(int record_size){
 /*
     Given the address of the block and size, retrieve the actual record
 */
-reviewRecord Storage::retrieve_record(reviewAddress ra, int record_size){
+reviewRecord Storage::retrieve_record(reviewAddress ra){
     try {
         // get source add
-        void *source_add = (int *)ra.block_add+ra.offset;
+        void *source_add = (char*) start_addr + ra.block_add * block_size + ra.offset;
 
-        void *main_mem_add; 
+        reviewRecord *main_mem_add = (reviewRecord*) malloc(record_size); 
 
         // void * memcpy ( void * destination, const void * source, size_t num );
         // copy to mem
@@ -121,35 +134,36 @@ reviewRecord Storage::retrieve_record(reviewAddress ra, int record_size){
         block_accessed++; 
 
         // return record
-   }
-   catch(...){
+        return *main_mem_add;
+    }
+    catch(...){
         // throw some error msg 
         
-   }
+    }
 
 }
 
 /*
     Given address of data, pointer to record and record size, insert record 
 */
-bool Storage::insert_record(reviewAddress ra, void *record, int record_size){
-   try {
+bool Storage::insert_record(reviewAddress ra, reviewRecord record){
+    try {
         // get destination add
-        void *dest_add = (int *)ra.block_add+ra.offset;
+        void *dest_add = (char*) start_addr + ra.block_add * block_size + ra.offset;
 
         // void * memcpy ( void * destination, const void * source, size_t num );
         // copy to mem
-        memcpy(dest_add, record, record_size);
+        memcpy(dest_add, &record, record_size);
 
         // increase no. of blocks accessed
         block_accessed++; 
 
         return true; 
-   }
-   catch(...){
+    }
+    catch(...){
         // throw some error msg 
         return false; 
-   }
+    }
     
 }
 
@@ -157,10 +171,10 @@ bool Storage::insert_record(reviewAddress ra, void *record, int record_size){
     Remove records
 */
 
-bool Storage::remove_record(reviewAddress ra, int record_size){
+bool Storage::remove_record(reviewAddress ra){
     try {
         // get destination add
-        void *dest_add = (int *)ra.block_add+ra.offset;
+        void *dest_add = (char*) start_addr + ra.block_add * block_size + ra.offset;
 
         // void * memcpy ( void * destination, const void * source, size_t num );
         // delete record by putting \0 
@@ -169,25 +183,26 @@ bool Storage::remove_record(reviewAddress ra, int record_size){
         // update size used
         actual_size_used -= record_size; 
 
-        // check if block empty 
-        // create empty block 
-        // Note: Might have an issue here but I can't debug right now will fix !!
-        char check_block[block_size];
-        memset(check_block, '\0', block_size); 
+        // // check if block empty 
+        // // create empty block 
+        // // Note: Might have an issue here but I can't debug right now will fix !!
+        // char* check_block = (char*) malloc(sizeof(char) * block_size);
 
-        // compare 2 blocks, if original one equals empty block, means empty. 
-        if (memcmp(check_block, (int *)ra.block_add, block_size) == 0){
-            block_size_used -= block_size; 
-            allocated_blocks --; 
-        }
-       
-        // increase no. of blocks accessed
+        // memset(check_block, '\0', block_size); 
+
+        // // compare 2 blocks, if original one equals empty block, means empty. 
+        // if (memcmp(check_block, (int *)ra.block_add, block_size) == 0){
+        //     block_size_used -= block_size; 
+        //     allocated_blocks --; 
+        // }
+
+        // // increase no. of blocks accessed
         block_accessed++; 
 
         return true; 
-   }
-   catch(...){
+    }
+    catch(...){
         // throw some error msg 
         return false; 
-   } 
+    } 
 }

@@ -11,6 +11,8 @@ TSVReader::TSVReader(std::string fileName)
 {
     assert(fileName.compare(fileName.length() - 5, 5, ".tsv"));
     dataFile.open(fileName);
+    // Skip the header
+    getNextRow();
 }
 
 std::vector<std::string> TSVReader::getNextRow()
