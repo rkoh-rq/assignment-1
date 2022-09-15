@@ -64,7 +64,7 @@ bool Storage::check_new_block(){
     {
         // Update total block size used
         block_size_used += block_size;
-        block_id = allocated_blocks * block_size;
+        block_id = allocated_blocks;
         // Reset internal block size used to 0 as it is a new block 
         internal_block_size_used = 0;
         // Increase allocated blocks 
@@ -178,7 +178,12 @@ bool Storage::remove_record(reviewAddress ra){
 
         // void * memcpy ( void * destination, const void * source, size_t num );
         // delete record by putting \0 
-        memcpy(dest_add, '\0', record_size);
+        memset(dest_add, '\0', record_size);
+
+        deletedChain* new_deleted = (deletedChain*) malloc(sizeof(deletedChain));
+        new_deleted->deletedAddr = ra;
+        new_deleted->next = deleted;
+        deleted = new_deleted;
 
         // update size used
         actual_size_used -= record_size; 
