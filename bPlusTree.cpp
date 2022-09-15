@@ -224,9 +224,13 @@ void BPTree::search(int lowerBound, int upperBound)
                 cout << "\n";
                 found = true;
 			}
-            /*if (i == cursor->size - 1) {
-				cursor = cursor->ptr[i + 1];
-			}*/
+			if (cursor->key[i].value > upperBound){
+				break;
+			}
+			if (i == cursor->size - 1){
+				cursor = cursor->ptr[i+1];
+				i = 0;
+			}
 		}
 		// Else element is not present
         if (!found){
