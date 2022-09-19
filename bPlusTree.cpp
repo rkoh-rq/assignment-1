@@ -14,7 +14,7 @@ struct record {
 class Node {
 	bool isLeaf;
     record *key;
-	int size;
+	int size;  
 	Node** ptr;
 	friend class BPTree;
     
@@ -41,7 +41,7 @@ public:
     }
 	void search(int,int);
 	void insert(int);
-	void display(Node*);
+	void display(Node*,int,int);
 	Node* getRoot()
     {
 	    return root;
@@ -401,6 +401,36 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 	return parent;
 }
 //TODO - make a remove, fix search and have a display
+
+//display
+void BPTree::display(Node* cursor, int level, int child) //child to be hardcoded as zero?
+{
+	if (cursor != NULL and level >= 0)
+	{
+		if (child == 0)
+			cout << "Content of Root Node = ";
+		else
+			cout << "Content of " << child << " Child Node = ";
+
+		for (int i = 0; i < cursor->size; i++)
+		{ 
+			cout << cursor->key[i].value << " ";
+		}
+		cout << "\n";
+		if (cursor->isLeaf != true)
+		{
+			for (int i = 0; i < cursor->size + 1; i++)
+			{
+				display(cursor->ptr[i], --level, ++child);
+			}
+		}
+	}
+}
+
+
+
+
+
 // Driver Code
 int main()
 {   
@@ -409,10 +439,15 @@ int main()
 	node.insert(6);
 	node.insert(16);
 	node.insert(26);
+
+	node.display(node.getRoot(),8,0);
+
 	node.insert(36);
 	node.insert(46);
 	// Function Call to search node
 	// with value 16
 	node.search(6,47);
+	node.display(node.getRoot(),8,0);
+	node.display(node.getRoot(),1,0);
 	return 0;
 }
