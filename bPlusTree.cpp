@@ -424,7 +424,7 @@ void BPTree::remove(int x)
 		Node* parent;
 
 		int leftSibling, rightSibling;
-		//in the following while loop, cursor will will travel to the leaf node possibly consisting the key
+		//in the following while loop, cursor will travel to the leaf node possibly consisting the key
 		while(cursor->isLeaf == false)
 		{
 			for(int i = 0; i < cursor->size; i++)
@@ -499,6 +499,7 @@ void BPTree::remove(int x)
 		cursor->ptr[cursor->size+1] = NULL;
 		cout<<"Deleted "<< x << " " <<" from leaf node successfully\n";
 		if(cursor->size >= (MAX+1)/2)//no underflow
+<<<<<<< HEAD
 		{
 			for (int i = 0; i < parent->size; i++){
 					if (parent->key[i].value == x){
@@ -506,6 +507,15 @@ void BPTree::remove(int x)
 							cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
 							break;
 					}
+=======
+		{	
+			for (int i = 0; i < parent->size; i++){
+				if (parent->key[i].value == x){
+					parent->key[i].value = cursor->key[0].value;
+					cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
+					break;
+				}
+>>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 			}
 			return;
 		}
@@ -581,10 +591,17 @@ void BPTree::remove(int x)
 
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
+<<<<<<< HEAD
 			// delete[] cursor->key;
 			// delete[] cursor->ptr;
 			// delete cursor;
 			cout << "Deleted one node" <<"\n";
+=======
+			//delete[] cursor->key;
+			//delete[] cursor->ptr;
+			//delete cursor;
+			cout << "Deleted 1" <<"\n";
+>>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
 		{
@@ -599,10 +616,17 @@ void BPTree::remove(int x)
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
+<<<<<<< HEAD
 			// delete[] rightNode->key;
 			// delete[] rightNode->ptr;
 			// delete rightNode;
 			cout << "Deleted one node \n";
+=======
+			//delete[] rightNode->key; 
+			//delete[] rightNode->ptr;
+			//delete rightNode;
+			cout << "Deleted 1 \n";
+>>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 		}
 	}
 }
@@ -922,8 +946,35 @@ int main()
 	node.display(node.getRoot());
 
 
+<<<<<<< HEAD
 	
 	node.displayRootFirstChild(node.getRoot());
 
+=======
+	node.insert(36);
+	node.insert(46);
+	// Function Call to search node
+	// with value 16
+	node.search(6,46);
+	node.display(node.getRoot(),8,0);
+	//node.display(node.getRoot(),1,0);
+
+	node.remove(6);
+	node.display(node.getRoot(),8,0);
+	node.remove(26);
+	node.display(node.getRoot(),8,0);
+>>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 	return 0;
+  	/*node.insert(5);
+  	node.insert(15);
+  	node.insert(25);
+  	node.insert(35);
+  	node.insert(45);
+
+  	node.display(node.getRoot(),8,0);
+	node.search(35,35);
+
+  	node.remove(25);
+
+  	node.display(node.getRoot(),8,0);*/
 }
