@@ -348,12 +348,15 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 
 		// If cursor is the root node
 		if (cursor == root) {
-
+			
 			// Create a new root node
 			Node* newRoot = new Node;
-
+			Node* newInternalChild = newInternal;
 			// Update key value
-			newRoot->key[0].value = cursor->key[cursor->size].value;
+			while (newInternalChild->isLeaf == false){
+				newInternalChild = newInternalChild->ptr[0];
+			}
+			newRoot->key[0].value = newInternalChild->key[0].value;
 
 			// Update rest field of
 			// B+ Tree Node
@@ -499,7 +502,6 @@ void BPTree::remove(int x)
 		cursor->ptr[cursor->size+1] = NULL;
 		cout<<"Deleted "<< x << " " <<" from leaf node successfully\n";
 		if(cursor->size >= (MAX+1)/2)//no underflow
-<<<<<<< HEAD
 		{
 			for (int i = 0; i < parent->size; i++){
 					if (parent->key[i].value == x){
@@ -507,15 +509,6 @@ void BPTree::remove(int x)
 							cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
 							break;
 					}
-=======
-		{	
-			for (int i = 0; i < parent->size; i++){
-				if (parent->key[i].value == x){
-					parent->key[i].value = cursor->key[0].value;
-					cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
-					break;
-				}
->>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 			}
 			return;
 		}
@@ -591,17 +584,10 @@ void BPTree::remove(int x)
 
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
-<<<<<<< HEAD
 			// delete[] cursor->key;
 			// delete[] cursor->ptr;
 			// delete cursor;
 			cout << "Deleted one node" <<"\n";
-=======
-			//delete[] cursor->key;
-			//delete[] cursor->ptr;
-			//delete cursor;
-			cout << "Deleted 1" <<"\n";
->>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
 		{
@@ -616,17 +602,10 @@ void BPTree::remove(int x)
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
-<<<<<<< HEAD
 			// delete[] rightNode->key;
 			// delete[] rightNode->ptr;
 			// delete rightNode;
 			cout << "Deleted one node \n";
-=======
-			//delete[] rightNode->key; 
-			//delete[] rightNode->ptr;
-			//delete rightNode;
-			cout << "Deleted 1 \n";
->>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 		}
 	}
 }
