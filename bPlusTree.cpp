@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <queue>
 using namespace std;
 int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
 
@@ -43,7 +44,9 @@ public:
 	void search(int,int);
 	void insert(int);
 	void remove(int);
-	void display(Node*,int,int);
+	// void display(Node*,int,int);
+	void display(Node*);
+	void displayRootFirstChild(Node*);
 	Node* getRoot()
     {
 	    return root;
@@ -60,6 +63,7 @@ void BPTree::insert(int x)
 		root->key[0].value = x;
 		root->isLeaf = true;
 		root->size = 1;
+		cout << "Key " << x << " successfully inserted!" <<endl;
 	}
 
 	// Traverse the B+ Tree
@@ -106,6 +110,7 @@ void BPTree::insert(int x)
 
 			cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
 			cursor->ptr[cursor->size - 1] = NULL;
+
 		}
 
 		else {
@@ -179,6 +184,8 @@ void BPTree::insert(int x)
 				insertInternal(newLeaf->key[0].value, parent,newLeaf);
 			}
 		}
+
+		cout << "Key " << x << " successfully inserted!" <<endl;
 	}
 }
 
@@ -223,8 +230,7 @@ void BPTree::search(int lowerBound, int upperBound)
 			// If found then return
 			
 			if (cursor->key[i].value >= lowerBound && cursor->key[i].value <= upperBound) {
-				cout << cursor->key[i].value;
-                cout << "\n";
+				cout << "Found Key: " << cursor->key[i].value << endl;
                 found = true;
 			}
 			if (cursor->key[i].value >= upperBound){
@@ -402,8 +408,6 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 	// Return parent node
 	return parent;
 }
-//TODO - make a remove, fix search and have a display
-
 //remove
 void BPTree::remove(int x)
 {
@@ -463,6 +467,7 @@ void BPTree::remove(int x)
 		}
 		if(!found) //if key does not exist in that leaf node
 		{
+			cout << "Key does not exist!";
 			return;
 		}
 
@@ -481,11 +486,11 @@ void BPTree::remove(int x)
 			}
 			if(cursor->size == 0)//if all keys are deleted
 			{
-				//cout<<"Tree died\n";
+				//cout<<"Tree is now empty\n";
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
-				cout << "Deleted 1" <<"\n";
+				cout << "Deleted a node --" <<"\n";
 				root = NULL;
 			}
 			return;
@@ -495,6 +500,13 @@ void BPTree::remove(int x)
 		cout<<"Deleted "<< x << " " <<" from leaf node successfully\n";
 		if(cursor->size >= (MAX+1)/2)//no underflow
 		{
+			for (int i = 0; i < parent->size; i++){
+					if (parent->key[i].value == x){
+							parent->key[i].value = cursor->key[0].value;
+							cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
+							break;
+					}
+			}
 			return;
 		}
 
@@ -561,7 +573,7 @@ void BPTree::remove(int x)
 			// transfer all keys to leftsibling and then transfer pointer to next leaf node
 			for(int i = leftNode->size, j = 0; j < cursor->size; i++, j++)
 			{
-				leftNode->key[i] = cursor->key[j];
+				leftNode->key[i].value = cursor->key[j].value;
 			}
 			leftNode->ptr[leftNode->size] = NULL;
 			leftNode->size += cursor->size;
@@ -569,10 +581,10 @@ void BPTree::remove(int x)
 
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
-			delete[] cursor->key;
-			delete[] cursor->ptr;
-			delete cursor;
-			cout << "Deleted 1" <<"\n";
+			// delete[] cursor->key;
+			// delete[] cursor->ptr;
+			// delete cursor;
+			cout << "Deleted one node" <<"\n";
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
 		{
@@ -587,10 +599,10 @@ void BPTree::remove(int x)
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
-			delete[] rightNode->key;
-			delete[] rightNode->ptr;
-			delete rightNode;
-			cout << "Deleted 1 \n";
+			// delete[] rightNode->key;
+			// delete[] rightNode->ptr;
+			// delete rightNode;
+			cout << "Deleted one node \n";
 		}
 	}
 }
@@ -609,12 +621,12 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 				delete[] child->key;
 				delete[] child->ptr;
 				delete child;
-				cout << "Deleted 1" <<"\n";
+				cout << "Deleted one node" <<"\n";
 				root = cursor->ptr[0];
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
-				cout << "Deleted 1" <<"\n";
+				cout << "Deleted one node" <<"\n";
 				//cout<<"Changed root node\n";
 				return;
 			}
@@ -623,12 +635,12 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 				delete[] child->key;
 				delete[] child->ptr;
 				delete child;
-				cout << "Deleted 1" <<"\n";
+				cout << "Deleted one node" <<"\n";
 				root = cursor->ptr[1];
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
-				cout << "Deleted 1" <<"\n";
+				cout << "Deleted one node" <<"\n";
 				//cout<<"Changed root node\n";
 				return;
 			}
@@ -779,57 +791,139 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 }
 
 
-//display
-void BPTree::display(Node* cursor, int level, int child) //child to be hardcoded as zero?
+/* Display level by level
+*/
+void BPTree::display(Node* cursor) 
 {
-	if (cursor != NULL and level >= 0)
-	{
-		if (child == 0)
-			cout << "Content of Root Node = ";
-		else
-			cout << "Content of " << child << " Child Node = ";
+	if (cursor == NULL) 
+		return;
 
-		for (int i = 0; i < cursor->size; i++)
-		{ 
-			cout << cursor->key[i].value << " ";
-		}
-		cout << "\n";
-		if (cursor->isLeaf != true)
-		{
-			for (int i = 0; i < cursor->size + 1; i++)
-			{
-				display(cursor->ptr[i], --level, ++child);
+	queue<Node*> q;
+	q.push(cursor);
+
+	while (!q.empty()) {
+
+		int queueSize = q.size();
+
+		//for each level
+		for (int i = 0; i < queueSize; i++) {
+
+			Node* temp = q.front(); 
+			q.pop();
+
+			//displaying a node
+			for (int j = 0; j < temp->size; j++)
+			{ 
+				cout << temp->key[j].value << " ";
+			}
+
+			cout << "|| ";//to seperate next neighbouring nodes
+			
+			//if internal node, push child node
+			if (!temp->isLeaf) {
+
+				for (int k = 0; k <= temp->size; k++)
+				{
+					q.push(temp->ptr[k]);
+				}
 			}
 		}
+		cout << endl;
 	}
 }
 
+/* Displat root node & its 1st child (pt 3)
+*/
+void BPTree::displayRootFirstChild(Node* cursor){
 
+	//assuming node passed in is always root node
+	Node* root = cursor;
 
+	if (cursor == NULL) 
+		return;
+
+	queue<Node*> q;
+	q.push(cursor);
+
+	while (!q.empty()) {
+
+		Node* temp = q.front(); 
+		q.pop();
+
+		//displaying a node
+		for (int j = 0; j < temp->size; j++){ 
+			cout << temp->key[j].value << " ";
+		}
+		cout << "|| ";//to seperate next neighbouring nodes
+
+		//push once (ie the 1st child node)
+		if(temp == root && temp->ptr[0] != nullptr)
+			q.push(temp->ptr[0]);
+
+		cout << endl;
+	}
+}
 
 
 // Driver Code
 int main()
 {   
     BPTree node;
-	// Create B+ Tree
-	node.insert(6);
-	node.insert(16);
-	node.insert(26);
+	// //Initialising B+ Tree
+	// cout<<"==Initialising B+Tree (6,16,26)==\n";
+	// node.insert(6);
+	// node.insert(16);
+	// node.insert(26);
+	// node.display(node.getRoot());
 
-	node.display(node.getRoot(),8,0);
+	// //Inserting keys
+	// cout<<"\n==Inserting key 36==\n";
+	// node.insert(36);
+	// node.display(node.getRoot());
 
-	node.insert(36);
-	node.insert(46);
-	// Function Call to search node
-	// with value 16
-	node.search(6,47);
-	node.display(node.getRoot(),8,0);
-	node.display(node.getRoot(),1,0);
+	// cout<<"\n==Inserting key 46==\n";
+	// node.insert(46);
+	// node.display(node.getRoot());
 
-	node.remove(6);
-	node.display(node.getRoot(),8,0);
+	// //Display root node only
+	// cout<<"\n==Display root node and 1st child node only==\n";
+	// node.displayRootFirstChild(node.getRoot());
 
-	node.remove(26);
+	// // Search keys
+	// cout<<"\n==Find key 16==\n";
+	// node.search(16,16);
+
+	// cout<<"\n==Find keys from range 6-47==\n";
+	// node.search(6,47);
+
+	// //Remove keys
+	// cout<<"\n==Remove key 6==\n";	
+	// node.remove(6);
+	// node.display(node.getRoot());
+
+	// cout<<"\n==Remove key 26==\n";		
+	// node.remove(26);
+	// node.display(node.getRoot());
+
+	cout<<"\n==Testing==\n";
+	node.insert(1);
+	node.insert(4);
+	node.insert(31);
+	node.insert(7);
+	node.insert(10);
+	node.insert(17);
+	node.insert(21);
+	node.insert(31);
+	node.insert(25);
+	node.insert(17);
+	node.insert(19);
+	node.insert(20);
+	node.insert(31);
+	node.display(node.getRoot());
+
+
+	
+	node.displayRootFirstChild(node.getRoot());
+
 	return 0;
 }
