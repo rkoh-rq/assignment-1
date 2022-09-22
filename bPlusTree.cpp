@@ -420,7 +420,7 @@ void BPTree::remove(int x)
 		Node* parent;
 
 		int leftSibling, rightSibling;
-		//in the following while loop, cursor will will travel to the leaf node possibly consisting the key
+		//in the following while loop, cursor will travel to the leaf node possibly consisting the key
 		while(cursor->isLeaf == false)
 		{
 			for(int i = 0; i < cursor->size; i++)
@@ -463,6 +463,7 @@ void BPTree::remove(int x)
 		}
 		if(!found) //if key does not exist in that leaf node
 		{
+			cout << "Key does not exist!";
 			return;
 		}
 
@@ -481,7 +482,7 @@ void BPTree::remove(int x)
 			}
 			if(cursor->size == 0)//if all keys are deleted
 			{
-				//cout<<"Tree died\n";
+				//cout<<"Tree is now empty\n";
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
@@ -494,7 +495,14 @@ void BPTree::remove(int x)
 		cursor->ptr[cursor->size+1] = NULL;
 		cout<<"Deleted "<< x << " " <<" from leaf node successfully\n";
 		if(cursor->size >= (MAX+1)/2)//no underflow
-		{
+		{	
+			for (int i = 0; i < parent->size; i++){
+				if (parent->key[i].value == x){
+					parent->key[i].value = cursor->key[0].value;
+					cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
+					break;
+				}
+			}
 			return;
 		}
 
@@ -561,7 +569,7 @@ void BPTree::remove(int x)
 			// transfer all keys to leftsibling and then transfer pointer to next leaf node
 			for(int i = leftNode->size, j = 0; j < cursor->size; i++, j++)
 			{
-				leftNode->key[i] = cursor->key[j];
+				leftNode->key[i].value = cursor->key[j].value;
 			}
 			leftNode->ptr[leftNode->size] = NULL;
 			leftNode->size += cursor->size;
@@ -569,9 +577,9 @@ void BPTree::remove(int x)
 
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
-			delete[] cursor->key;
-			delete[] cursor->ptr;
-			delete cursor;
+			//delete[] cursor->key;
+			//delete[] cursor->ptr;
+			//delete cursor;
 			cout << "Deleted 1" <<"\n";
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
@@ -587,9 +595,9 @@ void BPTree::remove(int x)
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
 			removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
-			delete[] rightNode->key;
-			delete[] rightNode->ptr;
-			delete rightNode;
+			//delete[] rightNode->key; 
+			//delete[] rightNode->ptr;
+			//delete rightNode;
 			cout << "Deleted 1 \n";
 		}
 	}
@@ -823,13 +831,25 @@ int main()
 	node.insert(46);
 	// Function Call to search node
 	// with value 16
-	node.search(6,47);
+	node.search(6,46);
 	node.display(node.getRoot(),8,0);
-	node.display(node.getRoot(),1,0);
+	//node.display(node.getRoot(),1,0);
 
 	node.remove(6);
 	node.display(node.getRoot(),8,0);
-
 	node.remove(26);
+	node.display(node.getRoot(),8,0);
 	return 0;
+  	/*node.insert(5);
+  	node.insert(15);
+  	node.insert(25);
+  	node.insert(35);
+  	node.insert(45);
+
+  	node.display(node.getRoot(),8,0);
+	node.search(35,35);
+
+  	node.remove(25);
+
+  	node.display(node.getRoot(),8,0);*/
 }
