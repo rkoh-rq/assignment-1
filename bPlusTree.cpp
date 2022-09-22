@@ -342,12 +342,15 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 
 		// If cursor is the root node
 		if (cursor == root) {
-
+			
 			// Create a new root node
 			Node* newRoot = new Node;
-
+			Node* newInternalChild = newInternal;
 			// Update key value
-			newRoot->key[0].value = cursor->key[cursor->size].value;
+			while (newInternalChild->isLeaf == false){
+				newInternalChild = newInternalChild->ptr[0];
+			}
+			newRoot->key[0].value = newInternalChild->key[0].value;
 
 			// Update rest field of
 			// B+ Tree Node
@@ -820,8 +823,25 @@ void BPTree::display(Node* cursor, int level, int child) //child to be hardcoded
 int main()
 {   
     BPTree node;
+	node.insert(1);
+	node.insert(4);
+	node.insert(7);
+	node.insert(10);
+	node.insert(17);
+	node.insert(21);
+	node.insert(31);
+	node.insert(25);
+	node.insert(19);
+	node.insert(20);
+	node
+	
+
+	node.display(node.getRoot(),8,0);
+	
+	//node.remove(4);
+	//node.display(node.getRoot(),8,0);
 	// Create B+ Tree
-	node.insert(6);
+	/*node.insert(6);
 	node.insert(16);
 	node.insert(26);
 
@@ -839,7 +859,7 @@ int main()
 	node.display(node.getRoot(),8,0);
 	node.remove(26);
 	node.display(node.getRoot(),8,0);
-	return 0;
+	return 0;*/
   	/*node.insert(5);
   	node.insert(15);
   	node.insert(25);
