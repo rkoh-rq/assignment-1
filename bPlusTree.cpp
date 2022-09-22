@@ -945,36 +945,7 @@ int main()
 	node.insert(31);
 	node.display(node.getRoot());
 
-
-<<<<<<< HEAD
-	
 	node.displayRootFirstChild(node.getRoot());
 
-=======
-	node.insert(36);
-	node.insert(46);
-	// Function Call to search node
-	// with value 16
-	node.search(6,46);
-	node.display(node.getRoot(),8,0);
-	//node.display(node.getRoot(),1,0);
-
-	node.remove(6);
-	node.display(node.getRoot(),8,0);
-	node.remove(26);
-	node.display(node.getRoot(),8,0);
->>>>>>> 3afe4b42487b4770d8ed913105ac33941483fd35
 	return 0;
-  	/*node.insert(5);
-  	node.insert(15);
-  	node.insert(25);
-  	node.insert(35);
-  	node.insert(45);
-
-  	node.display(node.getRoot(),8,0);
-	node.search(35,35);
-
-  	node.remove(25);
-
-  	node.display(node.getRoot(),8,0);*/
 }
