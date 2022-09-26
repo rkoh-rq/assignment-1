@@ -1,11 +1,9 @@
 #include <iostream>
 #include <fstream>
-
+#include <cstring>
 #include "storage.h"
 
 using namespace std; 
-
-std::size_t record_size = sizeof(reviewRecord);
 
 Storage::Storage(std::size_t disk_size, std::size_t block_size){
     this->disk_size = disk_size;
@@ -53,6 +51,16 @@ int Storage::get_block_id(){
     return block_id;
 }
 
+int Storage::get_allocated_blocks(){
+    return allocated_blocks;
+}
+
+
+int Storage::reset_blocks(){
+    int temp_blocks = block_accessed;
+    block_accessed = 0;
+    return temp_blocks;
+}
 
 /*
     Check if adding a new block exceeds total disk space, and adds a new block if possible.
@@ -81,7 +89,7 @@ bool Storage::check_new_block(){
 /*
     Return an allocated block ID to insert into 
 */
-reviewAddress Storage::record_get_block_add(){
+reviewAddress Storage::record_get_block_add(std::size_t record_size){
     if (record_size > block_size){
         // this shouldn't happen since the records are meant to be much smaller than blocks
     }
@@ -119,7 +127,7 @@ reviewAddress Storage::record_get_block_add(){
 /*
     Given the address of the block and size, retrieve the actual record
 */
-reviewRecord Storage::retrieve_record(reviewAddress ra){
+reviewRecord Storage::retrieve_record(reviewAddress ra, std::size_t record_size){
     try {
         // get source add
         void *source_add = (char*) start_addr + ra.block_add * block_size + ra.offset;
@@ -146,7 +154,7 @@ reviewRecord Storage::retrieve_record(reviewAddress ra){
 /*
     Given address of data, pointer to record and record size, insert record 
 */
-bool Storage::insert_record(reviewAddress ra, reviewRecord record){
+bool Storage::insert_record(reviewAddress ra, reviewRecord record, std::size_t record_size){
     try {
         // get destination add
         void *dest_add = (char*) start_addr + ra.block_add * block_size + ra.offset;
@@ -171,7 +179,7 @@ bool Storage::insert_record(reviewAddress ra, reviewRecord record){
     Remove records
 */
 
-bool Storage::remove_record(reviewAddress ra){
+bool Storage::remove_record(reviewAddress ra, std::size_t record_size){
     try {
         // get destination add
         void *dest_add = (char*) start_addr + ra.block_add * block_size + ra.offset;

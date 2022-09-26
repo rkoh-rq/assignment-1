@@ -1,42 +1,3 @@
-// Commenting out this part because I don't want to overwrite in case this code still needed
-//  #include <string>
-
-// #ifndef STORAGE_H
-// #define STORAGE_H
-
-// namespace Storage
-// {
-//     struct Record
-//     {
-//         char t_const[10];
-//         float averageRating;
-//         unsigned int numVotes;
-//     };
-//     struct DeletedChain
-//     {
-//         char* ptr;
-//         DeletedChain* next;
-//     };
-//     class MemoryPool
-//     {
-//     public:
-//         MemoryPool(unsigned int memory_size, unsigned int block_size);
-//         void insertRecord();
-//         void deleteRecord();
-
-//     private:
-//         // Pointer to the allocated space
-//         char* head;
-//         // For insertions/deletions, we will keep track of 
-//         // Pointer to current end (of space that has been filled)
-//         char* tail;
-//         // Chain of deleted records
-//         DeletedChain* deleted_chain;
-//     };
-// }
-
-// #endif
-
 #include <iostream>
 #include <fstream>
 // using namespace std; 
@@ -64,11 +25,12 @@ class Storage {
         
         // helper functions
         bool check_new_block(); // check if current block_size_used + block_size is more than disk_size
-        reviewAddress record_get_block_add(); // returns block add to store to 
+        reviewAddress record_get_block_add(std::size_t record_size); // returns block add to store to 
         // CRUD functions, without update 
-        reviewRecord retrieve_record(reviewAddress ra); // retrieve record given reviewAddress and record size
-        bool insert_record(reviewAddress ra, reviewRecord record); // store record
-        bool remove_record(reviewAddress ra); // remove record, return false if error
+        reviewRecord retrieve_record(reviewAddress ra, std::size_t record_size); // retrieve record given reviewAddress and record size
+        bool insert_record(reviewAddress ra, reviewRecord record, std::size_t record_size); // store record
+        bool remove_record(reviewAddress ra, std::size_t record_size); // remove record, return false if error
+        int reset_blocks(); 
         // get functions 
         int get_disk_size();
         int get_block_size(); 
@@ -77,6 +39,7 @@ class Storage {
         int get_internal_block_size_used(); 
         int get_actual_size_used();
         int get_block_id();
+        int get_allocated_blocks();
 
     private:
         // Disk 
