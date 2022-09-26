@@ -41,7 +41,7 @@ public:
 	BPTree(){
         root = NULL;
     }
-	void search(int,int);
+	int search(int,int);
 	void insert(int);
 	void remove(int);
 	// void display(Node*,int,int);
@@ -72,13 +72,11 @@ void BPTree::insert(int x)
 	else {
 		Node* cursor = root;
 		Node* parent;
-
 		// Till cursor reaches the
 		// leaf node
 		while (cursor->isLeaf == false) {
 
 			parent = cursor;
-
 			for (int i = 0; i < cursor->size; i++) {
 
 				// If found the position
@@ -96,12 +94,20 @@ void BPTree::insert(int x)
 				}
 			}
 		}
+		// Check for duplicate Keys case - TODO add in the extra pointer to the storage space
+		for (int i = 0; i < cursor->size; i++) {
+			if (cursor->key[i].value == x) {
+				//TODO link to the storage blk idk
+				return;
+			}
+		}
 
 		if (cursor->size < MAX) {
 			int i = 0;
 			while (x > cursor->key[i].value && i < cursor->size) {
 				i++;
 			}
+			
 
 			for (int j = cursor->size; j > i; j--) {
 				cursor->key[j].value = cursor->key[j - 1].value;
@@ -191,9 +197,10 @@ void BPTree::insert(int x)
 	}
 }
 
-void BPTree::search(int lowerBound, int upperBound)
+int BPTree::search(int lowerBound, int upperBound)
 {
     bool found = false;
+	int numAccessed = 0;
 	// If tree is empty
 	if (root == NULL) {
 		cout << "Tree is empty\n";
@@ -203,16 +210,33 @@ void BPTree::search(int lowerBound, int upperBound)
 	else {
 
 		Node* cursor = root;
-
 		// Till we reach leaf node
 		while (cursor->isLeaf == false) {
 
+			if (numAccessed < 5){
+				for (int j = 0; j < cursor->size; j++)
+				{ 
+					cout << cursor->key[j].value << " ";
+				}
+				cout << " || \n";
+			}
+			numAccessed++;
 			for (int i = 0; i < cursor->size; i++) {
-
+				
 				// If the element to be
 				// found is not present
 				if (lowerBound < cursor->key[i].value) {
 					cursor = cursor->ptr[i];
+					if (cursor->isLeaf){
+						if (numAccessed < 5) {
+						for (int j = 0; j < cursor->size; j++)
+						{ 
+							cout << cursor->key[j].value << " ";
+						}
+						cout << " || \n";
+						}
+						numAccessed++;
+					}
 					break;
 				}
 
@@ -220,6 +244,16 @@ void BPTree::search(int lowerBound, int upperBound)
 				// cursor node
 				if (i == cursor->size - 1) {
 					cursor = cursor->ptr[i + 1];
+					if (cursor->isLeaf){
+						if (numAccessed < 5) {
+						for (int j = 0; j < cursor->size; j++)
+						{ 
+							cout << cursor->key[j].value << " ";
+						}
+						cout << " || \n";
+						}
+						numAccessed++;
+					}
 					break;
 				}
 			}
@@ -232,6 +266,7 @@ void BPTree::search(int lowerBound, int upperBound)
 			// If found then return
 			
 			if (cursor->key[i].value >= lowerBound && cursor->key[i].value <= upperBound) {
+				// TODO For integration - it wouldnt be found key here but instead it would return to the data block
 				cout << "Found Key: " << cursor->key[i].value << endl;
                 found = true;
 			}
@@ -242,6 +277,14 @@ void BPTree::search(int lowerBound, int upperBound)
 			if (i == cursor->size - 1 && cursor->ptr[i+1] != nullptr){
 				cursor = cursor->ptr[i+1];
 				i = -1;
+				if (numAccessed < 5){
+					for (int j = 0; j < cursor->size; j++)
+					{ 
+					cout << cursor->key[j].value << " ";
+					}
+					cout << " || \n";
+				}
+				numAccessed++;
 			}
 		}
 		// Else element is not present
@@ -249,6 +292,7 @@ void BPTree::search(int lowerBound, int upperBound)
             cout << "Not found\n";
         }
 	}
+	return numAccessed;
 }
 
 
@@ -959,32 +1003,33 @@ int main()
 	// node.remove(26);
 	// node.display(node.getRoot());
 
-	// cout<<"\n==Testing==\n";
-	// node.insert(1);
-	// node.insert(4);
-	// node.insert(7);
-	// node.insert(10);
-	// node.insert(17);
-	// node.insert(19);
-	// node.insert(20);
-	// node.insert(25);
-	// node.insert(28);
-	// node.insert(31);
-	// node.insert(5);
-	// node.insert(16);
-
-	node.insert(6);
+	cout<<"\n==Testing==\n";
+	node.insert(1);
+	node.insert(4);
+	node.insert(7);
+	node.insert(10);
+	node.insert(17);
+	node.insert(19);
+	node.insert(20);
+	node.insert(25);
+	node.insert(28);
+	node.insert(31);
+	node.insert(5);
 	node.insert(16);
-	node.insert(26);
-	node.insert(36);
+
+	// node.insert(6);
+	// node.insert(16);
+	// node.insert(26);
+	// node.insert(36);
 
 	node.display(node.getRoot());
-	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	int numNodesAccessed = node.search(5,20);
+	cout << "Num Nodes Accessed: " << numNodesAccessed;
 	
-	node.remove(36);
-	node.display(node.getRoot());
-	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// node.remove(36);
+	// node.display(node.getRoot());
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
 
 	//node.displayRootFirstChild(node.getRoot());
 
