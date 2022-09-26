@@ -47,6 +47,8 @@ public:
 	// void display(Node*,int,int);
 	void display(Node*);
 	void displayRootFirstChild(Node*);
+	int getHeight(Node*);
+	int getNumberOfNodes(Node*);
 	Node* getRoot()
     {
 	    return root;
@@ -867,6 +869,52 @@ void BPTree::displayRootFirstChild(Node* cursor){
 	}
 }
 
+int BPTree::getHeight(Node* cursor){
+	if (cursor == NULL) return 0;
+
+	int height = 0;
+	
+	while (!cursor->isLeaf){
+		cursor = cursor->ptr[0];
+		height++;
+	}
+
+	height++;
+
+	return height;
+}
+
+int BPTree::getNumberOfNodes(Node* cursor){
+	
+	if (cursor == NULL) 
+		return 0;
+
+	queue<Node*> q;
+	q.push(cursor);
+	int numOfNodes = 0;
+
+	while (!q.empty()) {
+
+		int queueSize = q.size();
+
+		//for each level
+		for (int i = 0; i < queueSize; i++) {
+
+			Node* temp = q.front(); 
+			q.pop();
+			numOfNodes++;
+
+			if (!temp->isLeaf) {
+
+				for (int k = 0; k <= temp->size; k++)
+				{
+					q.push(temp->ptr[k]);
+				}
+			}
+		}
+	}
+	return numOfNodes;
+}
 
 // Driver Code
 int main()
@@ -878,15 +926,18 @@ int main()
 	// node.insert(16);
 	// node.insert(26);
 	// node.display(node.getRoot());
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
 	// //Inserting keys
 	// cout<<"\n==Inserting key 36==\n";
 	// node.insert(36);
 	// node.display(node.getRoot());
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
 	// cout<<"\n==Inserting key 46==\n";
 	// node.insert(46);
 	// node.display(node.getRoot());
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
 	// //Display root node only
 	// cout<<"\n==Display root node and 1st child node only==\n";
@@ -908,23 +959,34 @@ int main()
 	// node.remove(26);
 	// node.display(node.getRoot());
 
-	cout<<"\n==Testing==\n";
-	node.insert(1);
-	node.insert(4);
-	node.insert(31);
-	node.insert(7);
-	node.insert(10);
-	node.insert(17);
-	node.insert(21);
-	node.insert(31);
-	node.insert(25);
-	node.insert(17);
-	node.insert(19);
-	node.insert(20);
-	node.insert(31);
-	node.display(node.getRoot());
+	// cout<<"\n==Testing==\n";
+	// node.insert(1);
+	// node.insert(4);
+	// node.insert(7);
+	// node.insert(10);
+	// node.insert(17);
+	// node.insert(19);
+	// node.insert(20);
+	// node.insert(25);
+	// node.insert(28);
+	// node.insert(31);
+	// node.insert(5);
+	// node.insert(16);
 
-	node.displayRootFirstChild(node.getRoot());
+	node.insert(6);
+	node.insert(16);
+	node.insert(26);
+	node.insert(36);
+
+	node.display(node.getRoot());
+	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+
+	
+	node.remove(36);
+	node.display(node.getRoot());
+	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+
+	//node.displayRootFirstChild(node.getRoot());
 
 	return 0;
 }
