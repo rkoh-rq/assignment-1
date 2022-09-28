@@ -51,7 +51,7 @@ void BPTree::insert(int x)
 
 				// If reaches the end
 				if (i == cursor->size - 1) {
-					cursor	= cursor->ptr[i + 1].ptr;
+					cursor	= cursor->ptr[i + 1];
 					break;
 				}
 			}
