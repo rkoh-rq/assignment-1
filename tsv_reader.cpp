@@ -15,9 +15,14 @@ TSVReader::TSVReader(std::string fileName)
     getNextRow();
 }
 
+bool TSVReader::end()
+{
+    return dataFile.eof();
+}
+
 std::vector<std::string> TSVReader::getNextRow()
 {
-    if (!dataFile.eof()){
+    if (!end()){
         std::string str;
         std::getline( dataFile, str);
         std::stringstream buffer(str);

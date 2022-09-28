@@ -11,6 +11,7 @@ class TSVReader
     std::ifstream dataFile;
 public:
     TSVReader(std::string fileName);
+    bool end();
     void printSomeData(int rows_to_print);
     std::vector<std::string> getNextRow();
 };

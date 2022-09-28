@@ -65,12 +65,9 @@ int main() {
 
     std::cout << "Inserting records..." << std::endl; 
     // Check if last line 
-    bool check_end = true;
-    while(check_end){
+    while(!reader.end()){
         std::vector<std::string> temp = reader.getNextRow();
         if (temp[0] == ""){
-            std::cout << "Stop Inserting Records..." << std::endl; 
-            check_end = false; 
             break;
         }
         reviewRecord record;
@@ -86,7 +83,6 @@ int main() {
         // Insert record 
         records_storage.insert_record(addr, record, record_size);
         // std::cout << "Insert at " << addr.block_add << " | " << addr.offset << "\t|\t" << record.t_const << "\t" << record.avg_rating << "\t" << record.num_votes <<"\n";
-
     }
 
     // print statistics
