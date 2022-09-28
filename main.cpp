@@ -142,6 +142,7 @@ int main() {
     // print statistics
     records_storage.reset_blocks(); // can remove later when code is finalized and reset is called properly
     reviewChain* rc = searchRes.reviewResults;
+    bplustree.displayAccessedNodes(searchRes.accessedNodesQueue);
     std::cout << "Content of data blocks:" << std::endl;
     while (rc != NULL){
         reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
