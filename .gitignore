@@ -4,5 +4,6 @@ cmake_install.cmake
 
 .vs/
 .vscode/
+build/
 
 *.vcxproj*
