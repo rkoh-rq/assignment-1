@@ -96,7 +96,7 @@ reviewAddress Storage::record_get_block_add(std::size_t record_size){
 
     if (deleted){
         // if there are deleted records, add it into the deleted space instead
-        reviewAddress ra = deleted->deletedAddr;
+        reviewAddress ra = deleted->reviewAddr;
         deleted = deleted->next;
         return ra;
     }
@@ -188,8 +188,8 @@ bool Storage::remove_record(reviewAddress ra, std::size_t record_size){
         // delete record by putting \0 
         memset(dest_add, '\0', record_size);
 
-        deletedChain* new_deleted = (deletedChain*) malloc(sizeof(deletedChain));
-        new_deleted->deletedAddr = ra;
+        reviewChain* new_deleted = (reviewChain*) malloc(sizeof(reviewChain));
+        new_deleted->reviewAddr = ra;
         new_deleted->next = deleted;
         deleted = new_deleted;
 

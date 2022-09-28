@@ -13,10 +13,10 @@ struct reviewAddress {
     short int offset; // from which part of memory in block it started 
 };
 
-struct deletedChain
+struct reviewChain
 {
-    reviewAddress deletedAddr;
-    deletedChain* next;
+    reviewAddress reviewAddr;
+    reviewChain* next;
 };
 
 class Storage {
@@ -57,5 +57,5 @@ class Storage {
         int block_id; // id of block we are pointing to
         char* start_addr; // starting address
 
-        deletedChain* deleted; // deleted records
+        reviewChain* deleted; // deleted records
 };
