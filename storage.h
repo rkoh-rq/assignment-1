@@ -3,7 +3,7 @@
 // using namespace std; 
 
 struct reviewRecord{
-    char t_const [10];
+    char t_const [11];
     float avg_rating;
     int num_votes; 
 };

@@ -34,14 +34,12 @@ int main() {
     // streambuf *coutbuf = std::cout.rdbuf(); 
 
     // Create storage space for both disk and index
-    // Total 500MB: 150MB used for records storage, 350MB used for index storage
+    // Total 500MB: 150MB used for records storage
     // Initialise records storage
-    int records_size = 150000000;
-    Storage records_storage = Storage(records_size, block_size);
+    int disk_size = 100000000;
+    Storage records_storage = Storage(disk_size, block_size);
     
     // Initialise B+ tree storage
-    int index_size = 350000000;
-    Storage index_storage = Storage(index_size, block_size);
     BPTree bplustree = BPTree();
 
     /* 
@@ -58,8 +56,7 @@ int main() {
     std::cout << "Insert records and count number of blocks and size..." << std::endl; 
     std::cout << "Resetting acessed blocks..." << std::endl; 
     // Reset blocks accessed 
-    records_storage.reset_blocks();
-    index_storage.reset_blocks();  
+    records_storage.reset_blocks(); 
 
     std::cout << "Initialising TSV Reader..." << std::endl; 
     // Initialise TSV Reader
@@ -96,11 +93,11 @@ int main() {
     std::cout << "Statistics of number of blocks and size of database..." << std::endl; 
     int total_blocks = records_storage.get_total_blocks();
     std::cout << "Total number of blocks: " << total_blocks << std::endl; 
-    int db_size_used = records_storage.get_actual_size_used(); 
-    std::cout << "Size of database in B: " << db_size_used << std::endl;
-
 
     int blocks_used = records_storage.get_allocated_blocks();
+    int db_size_used = blocks_used * block_size; 
+    std::cout << "Size of database in B: " << db_size_used << std::endl;
+    
     std::cout << "Total number of blocks used: " << blocks_used << std::endl;
     float total_db_size = db_size_used / pow(10, 6);
     std::cout << "Size of database in MB: " << total_db_size << std::endl;
