@@ -177,6 +177,7 @@ searchResults BPTree::search(int lowerBound, int upperBound)
 	// note: upperBound is inclusive
 
 	struct searchResults res;
+	res.reviewResults = NULL;
     bool found = false;
 	int numAccessed = 0;
 
