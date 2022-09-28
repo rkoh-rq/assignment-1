@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <tuple>
 #include "storage.h"
 
 using namespace std; 
@@ -18,6 +19,8 @@ Storage::Storage(std::size_t disk_size, std::size_t block_size){
 
     this->start_addr = (char*) malloc(disk_size);
     this->deleted = nullptr;
+
+    this->is_iterating = false;
 }
 
 /*
@@ -218,4 +221,29 @@ bool Storage::remove_record(reviewAddress ra, std::size_t record_size){
         // throw some error msg 
         return false; 
     } 
+}
+
+bool Storage::check_iterator(std::size_t record_size){
+    if (is_iterating){
+        iteration_addr.offset += record_size;
+    }
+    else{
+        iteration_addr.block_add = 0;
+        iteration_addr.offset = 0;
+        is_iterating = true;
+    }
+
+    if (iteration_addr.block_add < block_id && iteration_addr.offset + record_size >= block_size){
+        iteration_addr.block_add += 1;
+        iteration_addr.offset = 0;
+    }
+    else if (iteration_addr.block_add == block_id && iteration_addr.offset + record_size >= internal_block_size_used){
+        is_iterating = false;
+        return false;
+    }
+    return true;
+}
+
+tuple<reviewAddress, int> Storage::get_sequential_records(std::size_t record_size){
+    return make_tuple(iteration_addr, retrieve_record(iteration_addr, record_size).num_votes);
 }

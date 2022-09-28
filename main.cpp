@@ -1,6 +1,7 @@
 #include "tsv_reader.h"
 #include "bPlusTree.h"
 
+#include <tuple>
 #include <cstring>
 #include <math.h>
 
@@ -83,7 +84,6 @@ int main() {
         addr = records_storage.record_get_block_add(record_size); 
         // Insert record 
         records_storage.insert_record(addr, record, record_size);
-        bplustree.insert(record.num_votes, addr);
         // std::cout << "Insert at " << addr.block_add << " | " << addr.offset << "\t|\t" << record.t_const << "\t" << record.avg_rating << "\t" << record.num_votes <<"\n";
     }
 
@@ -114,15 +114,27 @@ int main() {
     std::cout << "------------ Experiment 2 ------------ " << std::endl; 
     std::cout << "B+ Tree on numVotes and insert records sequentially..." << std::endl; 
 
-    bplustree.display(bplustree.getRoot());
-    searchResults searchRes = bplustree.search(1000,2000);
-    reviewChain* rc = searchRes.reviewResults;
-    std::cout << "Retrieve record:" << std::endl;
-    while (rc != nullptr){
-        reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
-        std::cout << check.t_const << "\t" << check.num_votes << std::endl;
-        rc = rc->next;
+    while(records_storage.check_iterator(record_size)){
+        auto record = records_storage.get_sequential_records(record_size);
+        bplustree.insert(std::get<1>(record), std::get<0>(record));
     }
+    // print statistics
+    std::cout << "Parameter n of B+ Tree: " << 3 << std::endl; 
+    std::cout << "Number of nodes of the B+ Tree: " << bplustree.getNumberOfNodes(bplustree.getRoot()) << std::endl;
+    std::cout << "Height of B+ Tree:  " << bplustree.getHeight(bplustree.getRoot()) << std::endl;
+    std::cout << "Content of root node and 1st child node: " << std::endl;
+    bplustree.displayRootFirstChild(bplustree.getRoot()) ;
+
+
+    // bplustree.display(bplustree.getRoot());
+    // searchResults searchRes = bplustree.search(1000,2000);
+    // reviewChain* rc = searchRes.reviewResults;
+    // std::cout << "Retrieve record:" << std::endl;
+    // while (rc != nullptr){
+    //     reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
+    //     std::cout << check.t_const << "\t" << check.num_votes << std::endl;
+    //     rc = rc->next;
+    // }
 
     return 0;
 }
