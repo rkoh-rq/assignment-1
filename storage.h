@@ -6,6 +6,7 @@ struct reviewRecord{
     char t_const [11];
     float avg_rating;
     int num_votes; 
+    bool deleted;
 };
 
 struct reviewAddress {
@@ -40,6 +41,8 @@ class Storage {
         int get_actual_size_used();
         int get_block_id();
         int get_allocated_blocks();
+        bool check_iterator(std::size_t record_size);
+        std::tuple<reviewAddress, int> get_sequential_records(std::size_t record_size); 
 
     private:
         // Disk 
@@ -56,6 +59,9 @@ class Storage {
 
         int block_id; // id of block we are pointing to
         char* start_addr; // starting address
+
+        bool is_iterating; // when sequentially creating the index
+        reviewAddress iteration_addr; // address being accessed for iteration
 
         reviewChain* deleted; // deleted records
 };
