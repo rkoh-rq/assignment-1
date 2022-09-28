@@ -5,7 +5,7 @@
 #include <vector>
 #include <queue>
 using namespace std;
-int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
+#define MAX 3 // TBC I DONT GET IT int is 4 ptr is 8
 
 struct record {
     int value;
@@ -1004,18 +1004,49 @@ int main()
 	// node.display(node.getRoot());
 
 	cout<<"\n==Testing==\n";
-	node.insert(1);
-	node.insert(4);
-	node.insert(7);
-	node.insert(10);
-	node.insert(17);
-	node.insert(19);
+	node.insert(1645);
+	node.display(node.getRoot());
+	node.insert(1342);
+	node.display(node.getRoot());
+	node.insert(120);
+	node.display(node.getRoot());
+	node.insert(2127);
+	node.display(node.getRoot());
+	node.insert(115);
+	node.display(node.getRoot());
+	node.insert(652);
+	node.display(node.getRoot());
+	node.insert(1807);
+	node.display(node.getRoot());
+	node.insert(154);
+	node.display(node.getRoot());
+	node.insert(6018);
+	node.display(node.getRoot());
+	node.insert(262);
+	node.display(node.getRoot());
+	node.insert(10287);
+	node.display(node.getRoot());
+	node.insert(1572);
+	node.display(node.getRoot());
+	node.insert(4599);
+	node.display(node.getRoot());
+	node.insert(817);
+	node.display(node.getRoot());
+	node.insert(1200);
+	node.display(node.getRoot());
+	node.insert(241);
+	node.display(node.getRoot());
+	node.insert(478);
+	node.display(node.getRoot());
 	node.insert(20);
-	node.insert(25);
-	node.insert(28);
-	node.insert(31);
-	node.insert(5);
-	node.insert(16);
+	node.display(node.getRoot());
+	node.insert(267);
+	node.display(node.getRoot());
+	node.insert(888);
+	node.display(node.getRoot());
+	node.insert(1141);
+	node.display(node.getRoot());
+	node.insert(51);
 
 	// node.insert(6);
 	// node.insert(16);
