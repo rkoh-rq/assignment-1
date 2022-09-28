@@ -1,11 +1,13 @@
 #include "tsv_reader.h"
-#include "storage.h"
 #include "bPlusTree.h"
 
 #include <cstring>
 #include <math.h>
 
 int main() {
+    // Set record size (fixed)
+    std::size_t record_size = sizeof(reviewRecord);
+
     // Get block size
     int block_size = 0;
     std::cout << "----------------------------------------" << std::endl; 
@@ -76,12 +78,12 @@ int main() {
         std::strcpy(record.t_const, temp[0].c_str());
         record.avg_rating = std::stof(temp[1]);
         record.num_votes = std::stoi(temp[2]);
-        std::size_t record_size = sizeof(record);
 
         // Get record address
         addr = records_storage.record_get_block_add(record_size); 
         // Insert record 
         records_storage.insert_record(addr, record, record_size);
+        bplustree.insert(record.num_votes, addr);
         // std::cout << "Insert at " << addr.block_add << " | " << addr.offset << "\t|\t" << record.t_const << "\t" << record.avg_rating << "\t" << record.num_votes <<"\n";
     }
 
@@ -111,6 +113,16 @@ int main() {
 
     std::cout << "------------ Experiment 2 ------------ " << std::endl; 
     std::cout << "B+ Tree on numVotes and insert records sequentially..." << std::endl; 
+
+    bplustree.display(bplustree.getRoot());
+    searchResults searchRes = bplustree.search(1000,2000);
+    reviewChain* rc = searchRes.reviewResults;
+    std::cout << "Retrieve record:" << std::endl;
+    while (rc != nullptr){
+        reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
+        std::cout << check.t_const << "\t" << check.num_votes << std::endl;
+        rc = rc->next;
+    }
 
     return 0;
 }

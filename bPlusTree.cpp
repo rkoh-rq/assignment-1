@@ -1,16 +1,20 @@
 #include "bPlusTree.h"
 
-void BPTree::insert(int x) 
+void BPTree::insert(int x, reviewAddress ra) 
 {	
 	
+	reviewChain* rc = new reviewChain;
+	rc->reviewAddr = ra;
+	rc->next = NULL;
 	// If root is null then return
 	// newly created node
 	if (root == NULL) {
 		root = new Node;
 		root->key[0] = x;
+		root->ptr[0].rc = rc;
 		root->isLeaf = true;
 		root->size = 1;
-		cout << "Key " << x << " successfully inserted!" <<endl;
+		// cout << "Key " << x << " successfully inserted!" <<endl;
 	}
 
 	// Traverse the B+ Tree
@@ -44,26 +48,26 @@ void BPTree::insert(int x)
 				// If found the position
 				// where we have to insert
 				// node
-					cursor = cursor->ptr[i];
 				if (x < cursor->key[i]) {
+					cursor = cursor->ptr[i].ptr;
 					break;
 				}
 
 				// If reaches the end
 				if (i == cursor->size - 1) {
-					cursor	= cursor->ptr[i + 1];
+					cursor	= cursor->ptr[i + 1].ptr;
 					break;
 				}
 			}
 		}
 
 		//integration team
-		// Check for duplicate Keys case - TODO add in the extra pointer to the storage space
+		// Check for duplicate Keys case
 		for (int i = 0; i < cursor->size; i++) {
-				//TODO link to the storage blk idk
-				//sth like
-					// cursor->key[i].add_vector.push_back(revAddress) 
 			if (cursor->key[i] == x) {
+				// Add linked list
+				rc->next = cursor->ptr[i].rc;
+				cursor->ptr[i].rc = rc;
 				return;
 			}
 		}
@@ -73,18 +77,17 @@ void BPTree::insert(int x)
 			while (x > cursor->key[i] && i < cursor->size) {
 				i++;
 			}
-			
 
+			for (int j = cursor->size + 1; j > i; j--) {
+				cursor->ptr[j] = cursor->ptr[j - 1];
+			}
 			for (int j = cursor->size; j > i; j--) {
 				cursor->key[j] = cursor->key[j - 1];
 			}
 			
 			cursor->key[i] = x;
+			cursor->ptr[i].rc = rc;
 			cursor->size++;
-
-			cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-			cursor->ptr[cursor->size - 1] = NULL;
-
 		}
 
 		else {
@@ -92,49 +95,57 @@ void BPTree::insert(int x)
 			// Create a newLeaf node
 			Node* newLeaf = new Node;
 
-			int virtualNode[MAX + 1];
+			int virtualKey[MAX + 1];
+			reviewChain* virtualPtr[MAX + 1];
+			Node* lastPtr;
 
 			// Update cursor to virtual
 			// node created
 			for (int i = 0; i < MAX; i++) {
-				virtualNode[i]	= cursor->key[i];
+				virtualKey[i] = cursor->key[i];
+				virtualPtr[i] = cursor->ptr[i].rc;
 			}
+			// Insert the current list ptr
+			// of cursor node to virtualPtr
+			lastPtr = cursor->ptr[MAX].ptr;
+
 			int i = 0, j;
 
 			// Traverse to find where the new
 			// node is to be inserted
-			while (x > virtualNode[i] && i < MAX) {
+			while (x > virtualKey[i] && i < MAX) {
 				i++;
 			}
 
 			// Update the current virtual
 			// Node to its previous
 			for (int j = MAX + 1; j > i; j--) {
-				virtualNode[j] = virtualNode[j - 1];
+				virtualKey[j] = virtualKey[j - 1];
+				virtualPtr[j] = virtualPtr[j - 1];
 			}
 
-			virtualNode[i] = x;
+			virtualKey[i] = x;
+			virtualPtr[i] = rc;
 			newLeaf->isLeaf = true;
 
 			cursor->size = (MAX + 1) / 2;
-			newLeaf->size = MAX + 1 - (MAX + 1) / 2;
+			newLeaf->size = MAX + 1 - cursor->size;
 
-			cursor->ptr[cursor->size] = newLeaf;
-
-			newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
-
-			cursor->ptr[MAX] = NULL;
+			cursor->ptr[cursor->size].ptr = newLeaf;
+			newLeaf->ptr[newLeaf->size].ptr = lastPtr;
 
 			// Update the current virtual
 			// Node's key to its previous
 			for (i = 0; i < cursor->size; i++) {
-				cursor->key[i] = virtualNode[i];
+				cursor->key[i] = virtualKey[i];
+				cursor->ptr[i].rc = virtualPtr[i];
 			}
 
 			// Update the newLeaf key to
 			// virtual Node
 			for (i = 0, j = cursor->size;i < newLeaf->size;i++, j++) {
-				newLeaf->key[i] = virtualNode[j];
+				newLeaf->key[i] = virtualKey[j];
+				newLeaf->ptr[i].rc = virtualPtr[j];
 			}
 
 			// If cursor is the root node
@@ -145,9 +156,9 @@ void BPTree::insert(int x)
 
 				// Update rest field of
 				// B+ Tree Node
-				newRoot->ptr[0] = cursor;
-				newRoot->ptr[1] = newLeaf;
 				newRoot->key[0] = newLeaf->key[0];
+				newRoot->ptr[0].ptr = cursor;
+				newRoot->ptr[1].ptr = newLeaf;
 				newRoot->isLeaf = false;
 				newRoot->size = 1;
 				root = newRoot;
@@ -158,20 +169,14 @@ void BPTree::insert(int x)
 				insertInternal(newLeaf->key[0], parent,newLeaf);
 			}
 		}
-
-		cout << "Key " << x << " successfully inserted!" <<endl;
+		// cout << "Key " << x << " successfully inserted!" <<endl;
 	}
 }
-
-//integration team to update
-struct returnResults{
-		queue<Node*> accessedNodesQueue;
-		// reviewAddress revAdd; // to be impl
-};
-
-returnResults BPTree::search(int lowerBound, int upperBound)
+searchResults BPTree::search(int lowerBound, int upperBound)
 {
-	struct returnResults res;
+	// note: upperBound is inclusive
+
+	struct searchResults res;
     bool found = false;
 	int numAccessed = 0;
 
@@ -187,7 +192,6 @@ returnResults BPTree::search(int lowerBound, int upperBound)
 		Node* cursor = root;
 		// Traversing internal nodes till we reach leaf node
 		while (!cursor->isLeaf) {
-			
 			//Counting and pushing nodes accessed to queue
 				//case for traversing internal nodes
 			numAccessed++;
@@ -195,18 +199,10 @@ returnResults BPTree::search(int lowerBound, int upperBound)
 
 			//for each key in the cursor
 			for (int i = 0; i < cursor->size; i++) {
-				
 				// If the element to be
 				// found is in left subtree
-					cursor = cursor->ptr[i];
-				if (lowerBound < cursor->key[i]) {
-
-					if (cursor->isLeaf){
-						//Counting and pushing nodes accessed to queue
-							//case for 1st leaf node reached
-						numAccessed++;
-						res.accessedNodesQueue.push(cursor);
-					}
+				if (lowerBound <= cursor->key[i]) {
+					cursor = cursor->ptr[i].ptr;
 					break;
 				}
 
@@ -214,14 +210,7 @@ returnResults BPTree::search(int lowerBound, int upperBound)
 				// cursor node, ie the last key
 				// Go to rightmost child
 				if (i == cursor->size - 1) {
-					cursor = cursor->ptr[i + 1];
-
-					if (cursor->isLeaf){
-						//Counting and pushing nodes accessed to queue
-							//case for 1st leaf node reached
-						numAccessed++;
-						res.accessedNodesQueue.push(cursor);
-					}
+					cursor = cursor->ptr[i + 1].ptr;
 					break;
 				}
 			}
@@ -230,25 +219,30 @@ returnResults BPTree::search(int lowerBound, int upperBound)
 		// Traverse the cursor and find
 		// the node with value x
 		for (int i = 0; i < cursor->size; i++) {
-            // TODO - change to allow for range queries
 			// If found then return
-			
 			if (cursor->key[i] >= lowerBound && cursor->key[i] <= upperBound) {
 				// TODO For integration - it wouldnt be found key here but instead it would return to the data block
-				cout << "Found Key: " << cursor->key[i] << endl;
+				// cout << "Found Key: " << cursor->key[i] << "\t" << cursor->ptr[i].rc << endl;
                 found = true;
+				reviewChain* read_rc = cursor->ptr[i].rc;
+				while(read_rc != nullptr){
+					reviewChain* new_rc = new reviewChain;
+					new_rc->reviewAddr = read_rc->reviewAddr;
+					new_rc->next = res.reviewResults;
+					res.reviewResults = new_rc;
+					read_rc = read_rc->next;
+				}
 			}
-			if (cursor->key[i] >= upperBound){
+			if (cursor->key[i] > upperBound){
 				break;
 			}
 			
 			//traverse neighbouring leaf nodes
-			if (i == cursor->size - 1 && cursor->ptr[i+1] != nullptr){
-				cursor = cursor->ptr[i+1];
-				i = -1;
-
+			if (i == cursor->size - 1 && cursor->ptr[cursor->size].ptr != nullptr){
 				//Counting and pushing nodes accessed to queue
-					//case for traversing neighbouring leaf ndoes
+				//case for traversing neighbouring leaf nodes
+				cursor = cursor->ptr[i+1].ptr;
+				i = -1;
 				numAccessed++;
 				res.accessedNodesQueue.push(cursor);
 			}
@@ -294,7 +288,7 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 
 		cursor->key[i] = x;
 		cursor->size++;
-		cursor->ptr[i + 1] = child;
+		cursor->ptr[i + 1].ptr = child;
 	}
 
 	// For overflow, break the node
@@ -314,7 +308,7 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		// Insert the current list ptr
 		// of cursor node to virtualPtr
 		for (int i = 0; i < MAX + 1; i++) {
-			virtualPtr[i] = cursor->ptr[i];
+			virtualPtr[i] = cursor->ptr[i].ptr;
 		}
 
 		int i = 0, j;
@@ -355,7 +349,7 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		}
 
 		for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
-            newInternal->ptr[i]	= virtualPtr[j];
+            newInternal->ptr[i].ptr	= virtualPtr[j];
 		}
 
 		// If cursor is the root node
@@ -366,14 +360,14 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 			Node* newInternalChild = newInternal;
 			// Update key value
 			while (newInternalChild->isLeaf == false){
-				newInternalChild = newInternalChild->ptr[0];
+				newInternalChild = newInternalChild->ptr[0].ptr;
 			}
 			newRoot->key[0] = newInternalChild->key[0];
 
 			// Update rest field of
 			// B+ Tree Node
-			newRoot->ptr[0] = cursor;
-			newRoot->ptr[1] = newInternal;
+			newRoot->ptr[0].ptr = cursor;
+			newRoot->ptr[1].ptr = newInternal;
 			newRoot->isLeaf = false;
 			newRoot->size = 1;
 			root = newRoot;
@@ -394,7 +388,7 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 	Node* parent;
 
 	// If cursor reaches the end of Tree
-	if (cursor->isLeaf || (cursor->ptr[0])->isLeaf) {
+	if (cursor->isLeaf || (cursor->ptr[0].ptr->isLeaf)) {
 		return NULL;
 	}
 
@@ -404,7 +398,7 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 
 		// Update the parent for the
 		// child Node
-		if (cursor->ptr[i] == child) {
+		if (cursor->ptr[i].ptr == child) {
 			parent = cursor;
 			return parent;
 		}
@@ -412,7 +406,7 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 		// Else recursively traverse to
 		// find child node
 		else {
-			parent = findParent(cursor->ptr[i], child);
+			parent = findParent(cursor->ptr[i].ptr, child);
 
 			// If parent is found, then
 			// return that parent node
@@ -456,7 +450,7 @@ int BPTree::remove(int x)
 
 				if(x < cursor->key[i])
 				{
-					cursor = cursor->ptr[i];
+					cursor = cursor->ptr[i].ptr;
 					break;
 				}
 
@@ -465,7 +459,7 @@ int BPTree::remove(int x)
 				{
 					leftSibling = i;
 					rightSibling = i+2;
-					cursor = cursor->ptr[i+1];
+					cursor = cursor->ptr[i+1].ptr;
 					break;
 				}
 			}
@@ -499,13 +493,12 @@ int BPTree::remove(int x)
 			cout<<"Deleted "<< x << " " <<  "from leaf node successfully\n";
 			for(int i = 0; i < MAX+1; i++)
 			{
-				cursor->ptr[i] = NULL;
+				cursor->ptr[i].ptr = NULL;
 			}
 			if(cursor->size == 0)//if all keys are deleted
 			{
 				//cout<<"Tree is now empty\n";
 				delete[] cursor->key;
-				delete[] cursor->ptr;
 				delete cursor;
 				numOfDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
@@ -514,7 +507,7 @@ int BPTree::remove(int x)
 			return numOfDeletedNodes;
 		}
 		cursor->ptr[cursor->size] = cursor->ptr[cursor->size+1];
-		cursor->ptr[cursor->size+1] = NULL;
+		cursor->ptr[cursor->size+1].ptr = NULL;
 		cout<<"Deleted "<< x << " " <<" from leaf node successfully\n";
 		if(cursor->size >= (MAX+1)/2)//no underflow
 		{
@@ -532,7 +525,7 @@ int BPTree::remove(int x)
 		//check if left sibling exists
 		if(leftSibling >= 0)
 		{
-			Node *leftNode = parent->ptr[leftSibling];
+			Node *leftNode = parent->ptr[leftSibling].ptr;
 			//check if it is possible to transfer
 			if(leftNode->size >= (MAX+1)/2+1)
 			{
@@ -544,13 +537,13 @@ int BPTree::remove(int x)
 				//shift pointer to next leaf
 				cursor->size++;
 				cursor->ptr[cursor->size] = cursor->ptr[cursor->size-1];
-				cursor->ptr[cursor->size-1] = NULL;
+				cursor->ptr[cursor->size-1].ptr = NULL;
 				//transfer
 				cursor->key[0] = leftNode->key[leftNode->size-1];
 				//shift pointer of leftsibling
 				leftNode->size--;
-				leftNode->ptr[leftNode->size] = cursor;
-				leftNode->ptr[leftNode->size+1] = NULL;
+				leftNode->ptr[leftNode->size].ptr = cursor;
+				leftNode->ptr[leftNode->size+1].ptr = NULL;
 				//update parent
 				parent->key[leftSibling] = cursor->key[0];
 				//cout<<"Transferred "<<cursor->key[0].key_value << " " << cursor->key[0].add_vect[0] <<" from left sibling of leaf node\n";
@@ -559,20 +552,20 @@ int BPTree::remove(int x)
 		}
 		if(rightSibling <= parent->size)//check if right sibling exist
 		{
-			Node *rightNode = parent->ptr[rightSibling];
+			Node *rightNode = parent->ptr[rightSibling].ptr;
 			//check if it is possible to transfer
 			if(rightNode->size >= (MAX+1)/2+1)
 			{
 				//shift pointer to next leaf
 				cursor->size++;
 				cursor->ptr[cursor->size] = cursor->ptr[cursor->size-1];
-				cursor->ptr[cursor->size-1] = NULL;
+				cursor->ptr[cursor->size-1].ptr = NULL;
 				//transfer
 				cursor->key[cursor->size-1] = rightNode->key[0];
 				//shift pointer of rightsibling
 				rightNode->size--;
 				rightNode->ptr[rightNode->size] = rightNode->ptr[rightNode->size+1];
-				rightNode->ptr[rightNode->size+1] = NULL;
+				rightNode->ptr[rightNode->size+1].ptr = NULL;
 				//shift conent of right sibling
 				for(int i = 0; i < rightNode->size; i++)
 				{
@@ -587,13 +580,13 @@ int BPTree::remove(int x)
 		//must merge and delete a node
 		if(leftSibling >= 0)//if left sibling exist
 		{
-			Node* leftNode = parent->ptr[leftSibling];
+			Node* leftNode = parent->ptr[leftSibling].ptr;
 			// transfer all keys to leftsibling and then transfer pointer to next leaf node
 			for(int i = leftNode->size, j = 0; j < cursor->size; i++, j++)
 			{
 				leftNode->key[i] = cursor->key[j];
 			}
-			leftNode->ptr[leftNode->size] = NULL;
+			leftNode->ptr[leftNode->size].ptr = NULL;
 			leftNode->size += cursor->size;
 			leftNode->ptr[leftNode->size] = cursor->ptr[cursor->size];
 
@@ -608,13 +601,13 @@ int BPTree::remove(int x)
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
 		{
-			Node* rightNode = parent->ptr[rightSibling];
+			Node* rightNode = parent->ptr[rightSibling].ptr;
 			// transfer all keys to cursor and then transfer pointer to next leaf node
 			for(int i = cursor->size, j = 0; j < rightNode->size; i++, j++)
 			{
 				cursor->key[i] = rightNode->key[j];
 			}
-			cursor->ptr[cursor->size] = NULL;
+			cursor->ptr[cursor->size].ptr = NULL;
 			cursor->size += rightNode->size;
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
@@ -640,32 +633,28 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	{
 		if(cursor->size == 1)//if only one key is left, change root
 		{
-			if(cursor->ptr[1] == child)
+			if(cursor->ptr[1].ptr == child)
 			{
 				delete[] child->key;
-				delete[] child->ptr;
 				delete child;
 				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
-				root = cursor->ptr[0];
+				root = cursor->ptr[0].ptr;
 				delete[] cursor->key;
-				delete[] cursor->ptr;
 				delete cursor;
 				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
 				//cout<<"Changed root node\n";
 				return addDeletedNodes;
 			}
-			else if(cursor->ptr[0] == child)
+			else if(cursor->ptr[0].ptr == child)
 			{
 				delete[] child->key;
-				delete[] child->ptr;
 				delete child;
 				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
-				root = cursor->ptr[1];
+				root = cursor->ptr[1].ptr;
 				delete[] cursor->key;
-				delete[] cursor->ptr;
 				delete cursor;
 				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
@@ -689,7 +678,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	//now deleting the pointer child
 	for(pos = 0; pos < cursor->size+1; pos++)
 	{
-		if(cursor->ptr[pos] == child)
+		if(cursor->ptr[pos].ptr == child)
 		{
 			break;
 		}
@@ -713,7 +702,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	//finding left n right sibling of cursor
 	for(pos = 0; pos < parent->size+1; pos++)
 	{
-		if(parent->ptr[pos] == cursor)
+		if(parent->ptr[pos].ptr == cursor)
 		{
 			leftSibling = pos - 1;
 			rightSibling = pos + 1;
@@ -723,7 +712,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	//try to transfer
 	if(leftSibling >= 0)//if left sibling exists
 	{
-		Node *leftNode = parent->ptr[leftSibling];
+		Node *leftNode = parent->ptr[leftSibling].ptr;
 		//check if it is possible to transfer
 		if(leftNode->size >= (MAX+1)/2)
 		{
@@ -751,7 +740,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	}
 	if(rightSibling <= parent->size)//check if right sibling exist
 	{
-		Node *rightNode = parent->ptr[rightSibling];
+		Node *rightNode = parent->ptr[rightSibling].ptr;
 		//check if it is possible to transfer
 		if(rightNode->size >= (MAX+1)/2)
 		{
@@ -779,7 +768,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	if(leftSibling >= 0)
 	{
 		//leftnode + parent key + cursor
-		Node *leftNode = parent->ptr[leftSibling];
+		Node *leftNode = parent->ptr[leftSibling].ptr;
 		leftNode->key[leftNode->size] = parent->key[leftSibling];
 		for(int i = leftNode->size+1, j = 0; j < cursor->size; j++)
 		{
@@ -788,7 +777,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 		for(int i = leftNode->size+1, j = 0; j < cursor->size+1; j++)
 		{
 			leftNode->ptr[i] = cursor->ptr[j];
-			cursor->ptr[j] = NULL;
+			cursor->ptr[j].ptr = NULL;
 		}
 		leftNode->size += cursor->size+1;
 		cursor->size = 0;
@@ -800,7 +789,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 	else if(rightSibling <= parent->size)
 	{
 		//cursor + parent key + rightnode
-		Node *rightNode = parent->ptr[rightSibling];
+		Node *rightNode = parent->ptr[rightSibling].ptr;
 		cursor->key[cursor->size] = parent->key[rightSibling-1];
 		for(int i = cursor->size+1, j = 0; j < rightNode->size; j++)
 		{
@@ -809,7 +798,7 @@ int BPTree::removeInternal(int x, Node* cursor, Node* child)
 		for(int i = cursor->size+1, j = 0; j < rightNode->size+1; j++)
 		{
 			cursor->ptr[i] = rightNode->ptr[j];
-			rightNode->ptr[j] = NULL;
+			rightNode->ptr[j].ptr = NULL;
 		}
 		cursor->size += rightNode->size+1;
 		rightNode->size = 0;
@@ -854,7 +843,7 @@ void BPTree::display(Node* cursor)
 
 				for (int k = 0; k <= temp->size; k++)
 				{
-					q.push(temp->ptr[k]);
+					q.push(temp->ptr[k].ptr);
 				}
 			}
 		}
@@ -887,8 +876,8 @@ void BPTree::displayRootFirstChild(Node* cursor){
 		cout << "|| ";//to seperate next neighbouring nodes
 
 		//push once (ie the 1st child node)
-		if(temp == root && temp->ptr[0] != nullptr)
-			q.push(temp->ptr[0]);
+		if(temp == root && temp->ptr[0].ptr != nullptr)
+			q.push(temp->ptr[0].ptr);
 
 		cout << endl;
 	}
@@ -923,7 +912,7 @@ int BPTree::getHeight(Node* cursor){
 	int height = 1;
 	
 	while (!cursor->isLeaf){
-		cursor = cursor->ptr[0];
+		cursor = cursor->ptr[0].ptr;
 		height++;
 	}
 
@@ -954,7 +943,7 @@ int BPTree::getNumberOfNodes(Node* cursor){
 
 				for (int k = 0; k <= temp->size; k++)
 				{
-					q.push(temp->ptr[k]);
+					q.push(temp->ptr[k].ptr);
 				}
 			}
 		}
@@ -1043,7 +1032,7 @@ int BPTree::getNumberOfNodes(Node* cursor){
 // 	// node.displayAccessedNodes(q);
 
 // 	//test 3: displaying accessed nodes
-// 	struct returnResults res = node.search(0,9);
+// 	struct searchResults res = node.search(0,9);
 // 	node.displayAccessedNodes(res.accessedNodesQueue);
 
 // 	// //test 4: deleting nodes

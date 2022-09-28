@@ -4,24 +4,39 @@
 #include <sstream>
 #include <vector>
 #include <queue>
+#include "storage.h"
 using namespace std;
 #define MAX 3 // TBC I DONT GET IT int is 4 ptr is 8
 
 
 class Node {
 	bool isLeaf;
-	int size;  
-	Node** ptr;
     int *key;
+	int size;
+	union Pointer{
+		Node* ptr;
+		reviewChain* rc;
+	};
+	vector<Pointer> ptr;
 	friend class BPTree;
     
 public:
 	Node()
     {
         isLeaf = true;
-	    ptr = new Node*[MAX + 1];
 	    key = new int[MAX];
+	    ptr = vector<Pointer>(MAX + 1);
     }
+};
+
+union Pointer{
+	Node* ptr;
+	reviewChain* rc;
+};
+
+struct searchResults{
+		queue<Node*> accessedNodesQueue;
+		reviewChain* reviewResults;
 };
 
 // BP tree
@@ -36,8 +51,8 @@ public:
 	BPTree(){
         root = NULL;
     }
-	struct returnResults search(int,int);
-	void insert(int);
+	struct searchResults search(int,int);
+	void insert(int, reviewAddress);
 	int remove(int);
 	// void display(Node*,int,int);
 	void display(Node*);
