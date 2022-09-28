@@ -147,9 +147,10 @@ int main() {
         reviewRecord check = records_storage.retrieve_record(rcExp3->reviewAddr, record_size);
         totalAvgRating += check.avg_rating; 
         recordCount++; 
-        std::cout << check.t_const << std::endl;
+        std::cout << check.t_const << "\t";
         rcExp3 = rcExp3->next;
     }
+    std::cout << std::endl;
     std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
     std::cout << "Average of average ratings: " << totalAvgRating/recordCount << std::endl;
 
@@ -174,16 +175,20 @@ int main() {
     bplustree.displayAccessedNodes(searchResExp4.accessedNodesQueue);
     std::cout << "--- Statistics ---" << std::endl; 
     std::cout << "Content of data blocks:" << std::endl;
+    totalAvgRating = 0; 
     while (rcExp4 != NULL){
         reviewRecord check = records_storage.retrieve_record(rcExp4->reviewAddr, record_size);
-        std::cout << check.t_const << std::endl;
+        totalAvgRating += check.avg_rating; 
+        recordCount++; 
+        std::cout << check.t_const << "\t";
         rcExp4 = rcExp4->next;
     }
+    std::cout << std::endl;
     std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
+    std::cout << "Average of average ratings: " << totalAvgRating/recordCount << std::endl;
 
     // bplustree.display(bplustree.getRoot());
     // searchResults searchRes = bplustree.search(1000,2000);
-    
 
     return 0;
 }
