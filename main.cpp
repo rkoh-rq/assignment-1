@@ -43,7 +43,7 @@ int main() {
     Storage records_storage = Storage(disk_size, block_size);
     
     // Initialise B+ tree storage
-    BPTree bplustree = BPTree();
+    BPTree bplustree = BPTree(block_size / record_size);
 
     /* 
         -----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ int main() {
     }
     // print statistics
     std::cout << "--- Statistics ---" << std::endl; 
-    std::cout << "Parameter n of B+ Tree: " << 3 << std::endl; // TODO: Change n to variable depending on size of block
+    std::cout << "Parameter n of B+ Tree: " << bplustree.getParameterN() << std::endl;
     std::cout << "Number of nodes of the B+ Tree: " << bplustree.getNumberOfNodes(bplustree.getRoot()) << std::endl;
     std::cout << "Height of B+ Tree:  " << bplustree.getHeight(bplustree.getRoot()) << std::endl;
     std::cout << "Content of root node and 1st child node: " << std::endl;

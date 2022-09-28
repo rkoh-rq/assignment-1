@@ -9,7 +9,7 @@ void BPTree::insert(int x, reviewAddress ra)
 	// If root is null then return
 	// newly created node
 	if (root == NULL) {
-		root = new Node;
+		root = new Node(MAX);
 		root->key[0] = x;
 		root->ptr[0].rc = rc;
 		root->isLeaf = true;
@@ -93,10 +93,10 @@ void BPTree::insert(int x, reviewAddress ra)
 		else {
 
 			// Create a newLeaf node
-			Node* newLeaf = new Node;
+			Node* newLeaf = new Node(MAX);
 
-			int virtualKey[MAX + 1];
-			reviewChain* virtualPtr[MAX + 1];
+			int *virtualKey = (int *)malloc(sizeof(int)*(MAX + 1));
+			reviewChain** virtualPtr = (reviewChain **)malloc(sizeof(reviewChain*) * (MAX + 1));
 			Node* lastPtr;
 
 			// Update cursor to virtual
@@ -152,7 +152,7 @@ void BPTree::insert(int x, reviewAddress ra)
 			if (cursor == root) {
 
 				// Create a new Node
-				Node* newRoot = new Node;
+				Node* newRoot = new Node(MAX);
 
 				// Update rest field of
 				// B+ Tree Node
@@ -302,9 +302,9 @@ void BPTree::insertInternal(Node* child, Node* newChild)
 	else {
 
 		// For new Interval
-		Node* newInternal = new Node;
-		int virtualKey[MAX + 1];
-		Node* virtualPtr[MAX + 2];
+		Node* newInternal = new Node(MAX);
+		int *virtualKey = (int *)malloc(sizeof(int)*(MAX + 1));
+		Node** virtualPtr = (Node **)malloc(sizeof(Node*) * (MAX + 2));
 
 		// Insert the current list key
 		// of cursor node to virtualKey
@@ -370,7 +370,7 @@ void BPTree::insertInternal(Node* child, Node* newChild)
 		if (cursor == root) {
 			
 			// Create a new root node
-			Node* newRoot = new Node;
+			Node* newRoot = new Node(MAX);
 			Node* newInternalChild = newInternal;
 			// Update key value
 			while (newInternalChild->isLeaf == false){

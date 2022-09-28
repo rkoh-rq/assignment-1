@@ -6,8 +6,6 @@
 #include <queue>
 #include "storage.h"
 using namespace std;
-#define MAX 3 // TBC I DONT GET IT int is 4 ptr is 8
-
 
 class Node {
 	bool isLeaf;
@@ -21,11 +19,11 @@ class Node {
 	friend class BPTree;
     
 public:
-	Node()
+	Node(int m)
     {
         isLeaf = true;
-	    key = new int[MAX];
-	    ptr = vector<Pointer>(MAX + 1);
+	    key = (int *)malloc(sizeof(int) * m);
+	    ptr = vector<Pointer>(m + 1);
     }
 };
 
@@ -47,9 +45,11 @@ class BPTree {
 	int removeInternal(int,Node*,Node*);
 	Node* findParent(Node*, Node*);
 	vector<Node*> visited;
+	int MAX;
 
 public:
-	BPTree(){
+	BPTree(int m){
+		MAX = m;
         root = NULL;
     }
 	struct searchResults search(int,int);
@@ -61,6 +61,9 @@ public:
 	void displayAccessedNodes(queue<Node*>);
 	int getHeight(Node*);
 	int getNumberOfNodes(Node*);
+	int getParameterN(){
+		return MAX;
+	}
 	Node* getRoot()
     {
 	    return root;
