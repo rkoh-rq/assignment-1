@@ -37,7 +37,7 @@ int main() {
     // streambuf *coutbuf = std::cout.rdbuf(); 
 
     // Create storage space for both disk and index
-    // Total 500MB: 150MB used for records storage
+    // Total 100MB used for records storage
     // Initialise records storage
     int disk_size = 100000000;
     Storage records_storage = Storage(disk_size, block_size);
@@ -53,7 +53,6 @@ int main() {
             - Size of database (in MB)
         -----------------------------------------------------------------------------
     */
-
 
     std::cout << "------------ Experiment 1 ------------ " << std::endl; 
     std::cout << "Insert records and count number of blocks and size..." << std::endl; 
@@ -88,15 +87,12 @@ int main() {
     }
 
     // print statistics
-    std::cout << "Statistics of number of blocks and size of database..." << std::endl; 
-    int total_blocks = records_storage.get_total_blocks();
-    std::cout << "Total number of blocks: " << total_blocks << std::endl; 
+    std::cout << "--- Statistics ---" << std::endl; 
 
     int blocks_used = records_storage.get_allocated_blocks();
     int db_size_used = blocks_used * block_size; 
-    std::cout << "Size of database in B: " << db_size_used << std::endl;
-    
     std::cout << "Total number of blocks used: " << blocks_used << std::endl;
+
     float total_db_size = db_size_used / pow(10, 6);
     std::cout << "Size of database in MB: " << total_db_size << std::endl;
 
@@ -119,15 +115,48 @@ int main() {
         bplustree.insert(std::get<1>(record), std::get<0>(record));
     }
     // print statistics
+    std::cout << "--- Statistics ---" << std::endl; 
     std::cout << "Parameter n of B+ Tree: " << 3 << std::endl; // TODO: Change n to variable depending on size of block
     std::cout << "Number of nodes of the B+ Tree: " << bplustree.getNumberOfNodes(bplustree.getRoot()) << std::endl;
     std::cout << "Height of B+ Tree:  " << bplustree.getHeight(bplustree.getRoot()) << std::endl;
     std::cout << "Content of root node and 1st child node: " << std::endl;
-    bplustree.displayRootFirstChild(bplustree.getRoot()) ;
+    bplustree.displayRootFirstChild(bplustree.getRoot());
 
     /* 
         -----------------------------------------------------------------------------
-            Experiment 4: retrieve those movies with the attribute
+        Experiment 3
+        Retrieve movies with "numVotes" equal to 500 and report:
+        - the number and the content of index nodes the process accesses;
+        - the number and the content of data blocks the process accesses;
+        - the average of “averageRating’s” of the records that are returned;
+        -----------------------------------------------------------------------------
+    */
+    std::cout << "------------ Experiment 3 ------------ " << std::endl; 
+    std::cout << "Retrieving movies with numVotes equal 500..." << std::endl;
+    searchResults searchResExp3 = bplustree.search(500,500); 
+
+    // print statistics
+    records_storage.reset_blocks(); // can remove later when code is finalized and reset is called properly
+    reviewChain* rcExp3 = searchResExp3.reviewResults;
+    bplustree.displayAccessedNodes(searchResExp3.accessedNodesQueue);
+    std::cout << "--- Statistics ---" << std::endl; 
+    std::cout << "Content of data blocks:" << std::endl;
+    float totalAvgRating = 0; 
+    int recordCount = 0; 
+    while (rcExp3 != NULL){
+        reviewRecord check = records_storage.retrieve_record(rcExp3->reviewAddr, record_size);
+        totalAvgRating += check.avg_rating; 
+        recordCount++; 
+        std::cout << check.t_const << std::endl;
+        rcExp3 = rcExp3->next;
+    }
+    std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
+    std::cout << "Average of average ratings: " << totalAvgRating/recordCount << std::endl;
+
+    /* 
+        -----------------------------------------------------------------------------
+        Experiment 4
+        Retrieve those movies with the attribute
         “numVotes” from 30,000 to 40,000, both inclusively and report the following
         statistics:
         - the number and the content of index nodes the process accesses;
@@ -136,18 +165,19 @@ int main() {
         -----------------------------------------------------------------------------
     */
     std::cout << "------------ Experiment 4 ------------ " << std::endl; 
-    std::cout << "Retrieving movies with numVotes from 30,000 to 40,000" << std::endl;
-    searchResults searchRes = bplustree.search(30000,40000); 
+    std::cout << "Retrieving movies with numVotes from 30,000 to 40,000..." << std::endl;
+    searchResults searchResExp4 = bplustree.search(30000,40000); 
 
     // print statistics
     records_storage.reset_blocks(); // can remove later when code is finalized and reset is called properly
-    reviewChain* rc = searchRes.reviewResults;
-    bplustree.displayAccessedNodes(searchRes.accessedNodesQueue);
+    reviewChain* rcExp4 = searchResExp4.reviewResults;
+    bplustree.displayAccessedNodes(searchResExp4.accessedNodesQueue);
+    std::cout << "--- Statistics ---" << std::endl; 
     std::cout << "Content of data blocks:" << std::endl;
-    while (rc != NULL){
-        reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
+    while (rcExp4 != NULL){
+        reviewRecord check = records_storage.retrieve_record(rcExp4->reviewAddr, record_size);
         std::cout << check.t_const << std::endl;
-        rc = rc->next;
+        rcExp4 = rcExp4->next;
     }
     std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
 
