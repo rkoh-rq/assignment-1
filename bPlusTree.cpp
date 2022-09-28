@@ -2,7 +2,7 @@
 
 void BPTree::insert(int x, reviewAddress ra) 
 {	
-	
+	visited.clear();
 	reviewChain* rc = new reviewChain;
 	rc->reviewAddr = ra;
 	rc->next = NULL;
@@ -41,7 +41,7 @@ void BPTree::insert(int x, reviewAddress ra)
 		// Till cursor reaches the
 		// leaf node
 		while (cursor->isLeaf == false) {
-
+			visited.push_back(cursor);
 			parent = cursor;
 			for (int i = 0; i < cursor->size; i++) {
 
@@ -62,7 +62,7 @@ void BPTree::insert(int x, reviewAddress ra)
 		}
 
 		//integration team
-		// Check for duplicate Keys case
+		// Check for duplicate keys case
 		for (int i = 0; i < cursor->size; i++) {
 			if (cursor->key[i] == x) {
 				// Add linked list
@@ -119,7 +119,7 @@ void BPTree::insert(int x, reviewAddress ra)
 
 			// Update the current virtual
 			// Node to its previous
-			for (int j = MAX + 1; j > i; j--) {
+			for (int j = MAX; j > i; j--) {
 				virtualKey[j] = virtualKey[j - 1];
 				virtualPtr[j] = virtualPtr[j - 1];
 			}
@@ -166,7 +166,7 @@ void BPTree::insert(int x, reviewAddress ra)
 			else {
 				// Recursive Call for
 				// insert in internal
-				insertInternal(newLeaf->key[0], parent,newLeaf);
+				insertInternal(cursor, newLeaf);
 			}
 		}
 		// cout << "Key " << x << " successfully inserted!" <<endl;
@@ -260,15 +260,22 @@ searchResults BPTree::search(int lowerBound, int upperBound)
 
 // Function to implement the Insert
 // Internal Operation in B+ Tree
-void BPTree::insertInternal(int x,Node* cursor, Node* child)
+void BPTree::insertInternal(Node* child, Node* newChild)
 {
+	Node* cursor = visited.back();
+	Node* temp = newChild;
+	while(!temp->isLeaf){
+		temp = temp->ptr[0].ptr;
+	}
+	int x = temp->key[0];
+	visited.pop_back();
 
 	// If we doesn't have overflow
 	if (cursor->size < MAX) {
 		int i = 0;
 		// Traverse the child node
 		// for current cursor node
-		while (x > cursor->key[i] && i < cursor->size) {
+		while (cursor->ptr[i].ptr != child) {
 			i++;
 		}
 
@@ -276,7 +283,6 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		// and update the current key
 		// to its previous node key
 		for (int j = cursor->size; j > i; j--) {
-
 			cursor->key[j] = cursor->key[j - 1];
 		}
 
@@ -286,10 +292,10 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		for (int j = cursor->size + 1; j > i + 1; j--) {
 			cursor->ptr[j] = cursor->ptr[j - 1];
 		}
-
+		
 		cursor->key[i] = x;
 		cursor->size++;
-		cursor->ptr[i + 1].ptr = child;
+		cursor->ptr[i + 1].ptr = newChild;
 	}
 
 	// For overflow, break the node
@@ -323,7 +329,7 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		// Traverse the virtualKey node
 		// and update the current key
 		// to its previous node key
-		for (int j = MAX + 1;j > i; j--) {
+		for (int j = MAX; j > i; j--) {
             virtualKey[j] = virtualKey[j - 1];
 		}
 
@@ -332,11 +338,11 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 		// Traverse the virtualKey node
 		// and update the current ptr
 		// to its previous node ptr
-		for (int j = MAX + 2; j > i + 1; j--) {
+		for (int j = MAX + 1; j > i; j--) {
 			virtualPtr[j] = virtualPtr[j - 1];
 		}
 
-		virtualPtr[i + 1] = child;
+		virtualPtr[i + 1] = newChild;
 		newInternal->isLeaf = false;
 
 		cursor->size = (MAX + 1) / 2;
@@ -351,6 +357,13 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 
 		for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
             newInternal->ptr[i].ptr	= virtualPtr[j];
+		}
+		// update old node
+		for (i = 0; i < cursor->size; i++) {
+            cursor->key[i] = virtualKey[i];
+		}
+		for (i = 0; i < cursor->size + 1; i++) {
+            cursor->ptr[i].ptr	= virtualPtr[i];
 		}
 
 		// If cursor is the root node
@@ -378,7 +391,7 @@ void BPTree::insertInternal(int x,Node* cursor, Node* child)
 
 			// Recursive Call to insert
 			// the data
-			insertInternal(cursor->key[cursor->size], findParent(root,cursor),newInternal);
+			insertInternal(cursor, newInternal);
 		}
 	}
 }

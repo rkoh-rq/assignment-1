@@ -43,9 +43,10 @@ struct searchResults{
 class BPTree {
 	Node* root;
 	queue<Node*> accessedNodesQueue;
-	void insertInternal(int,Node*,Node*);
+	void insertInternal(Node*,Node*);
 	int removeInternal(int,Node*,Node*);
 	Node* findParent(Node*, Node*);
+	vector<Node*> visited;
 
 public:
 	BPTree(){
