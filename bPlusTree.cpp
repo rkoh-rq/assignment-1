@@ -1,60 +1,4 @@
-#include <climits>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <queue>
-using namespace std;
-int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
-
-struct key_struct {
-    int value;
-    vector <void*> add_vector; //to hold the "record ptrs"
-};
-
-
-class Node {
-	bool isLeaf;
-    key_struct *key;
-	int size;  
-	Node** ptr;
-	friend class BPTree;
-    
-public:
-	Node()
-    {
-        isLeaf = true;
-	    key = new key_struct[MAX];
-	    ptr = new Node*[MAX + 1];
-    }
-};
-
-// BP tree
-class BPTree {
-	Node* root;
-	queue<Node*> accessedNodesQueue;
-	void insertInternal(int,Node*,Node*);
-	int removeInternal(int,Node*,Node*);
-	Node* findParent(Node*, Node*);
-
-public:
-	BPTree(){
-        root = NULL;
-    }
-	struct returnResults search(int,int);
-	void insert(int);
-	int remove(int);
-	// void display(Node*,int,int);
-	void display(Node*);
-	void displayRootFirstChild(Node*);
-	void displayAccessedNodes(queue<Node*>);
-	int getHeight(Node*);
-	int getNumberOfNodes(Node*);
-	Node* getRoot()
-    {
-	    return root;
-    };
-};
+#include "bPlusTree.h"
 
 void BPTree::insert(int x) 
 {	
@@ -1019,117 +963,117 @@ int BPTree::getNumberOfNodes(Node* cursor){
 }
 
 
-// Driver Code
-int main()
-{   
-    BPTree node;
-	cout<<"Size of BPTree: " << sizeof(node)<<" bytes";
-	// //Initialising B+ Tree
-	// cout<<"==Initialising B+Tree (6,16,26)==\n";
-	// node.insert(6);
-	// node.insert(16);
-	// node.insert(26);
-	// node.display(node.getRoot());
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
+// // Driver Code
+// int main()
+// {   
+//     BPTree node;
+// 	cout<<"Size of BPTree: " << sizeof(node)<<" bytes";
+// 	// //Initialising B+ Tree
+// 	// cout<<"==Initialising B+Tree (6,16,26)==\n";
+// 	// node.insert(6);
+// 	// node.insert(16);
+// 	// node.insert(26);
+// 	// node.display(node.getRoot());
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
-	// //Inserting keys
-	// cout<<"\n==Inserting key 36==\n";
-	// node.insert(36);
-	// node.display(node.getRoot());
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
+// 	// //Inserting keys
+// 	// cout<<"\n==Inserting key 36==\n";
+// 	// node.insert(36);
+// 	// node.display(node.getRoot());
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
-	// cout<<"\n==Inserting key 46==\n";
-	// node.insert(46);
-	// node.display(node.getRoot());
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
+// 	// cout<<"\n==Inserting key 46==\n";
+// 	// node.insert(46);
+// 	// node.display(node.getRoot());
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot());
 
-	// //Display root node only
-	// cout<<"\n==Display root node and 1st child node only==\n";
-	// node.displayRootFirstChild(node.getRoot());
+// 	// //Display root node only
+// 	// cout<<"\n==Display root node and 1st child node only==\n";
+// 	// node.displayRootFirstChild(node.getRoot());
 
-	// // Search keys
-	// cout<<"\n==Find key 16==\n";
-	// node.search(16,16);
+// 	// // Search keys
+// 	// cout<<"\n==Find key 16==\n";
+// 	// node.search(16,16);
 
-	// cout<<"\n==Find keys from range 6-47==\n";
-	// node.search(6,47);
+// 	// cout<<"\n==Find keys from range 6-47==\n";
+// 	// node.search(6,47);
 
-	// //Remove keys
-	// cout<<"\n==Remove key 6==\n";	
-	// node.remove(6);
-	// node.display(node.getRoot());
+// 	// //Remove keys
+// 	// cout<<"\n==Remove key 6==\n";	
+// 	// node.remove(6);
+// 	// node.display(node.getRoot());
 
-	// cout<<"\n==Remove key 26==\n";		
-	// node.remove(26);
-	// node.display(node.getRoot());
+// 	// cout<<"\n==Remove key 26==\n";		
+// 	// node.remove(26);
+// 	// node.display(node.getRoot());
 
-	cout<<"\n==Testing==\n";
-	node.insert(1);
-	node.insert(4);
-	node.insert(7);
-	node.insert(10);
-	// node.insert(17);
-	// node.insert(19);
-	node.insert(20);
-	node.insert(21);
-	node.insert(25);
-	// node.insert(28);
-	node.insert(31);
-	// node.insert(5);
-	// node.insert(16);
+// 	cout<<"\n==Testing==\n";
+// 	node.insert(1);
+// 	node.insert(4);
+// 	node.insert(7);
+// 	node.insert(10);
+// 	// node.insert(17);
+// 	// node.insert(19);
+// 	node.insert(20);
+// 	node.insert(21);
+// 	node.insert(25);
+// 	// node.insert(28);
+// 	node.insert(31);
+// 	// node.insert(5);
+// 	// node.insert(16);
 
-	// node.insert(6);
-	// node.insert(16);
-	node.insert(26);
-	node.insert(36);
+// 	// node.insert(6);
+// 	// node.insert(16);
+// 	node.insert(26);
+// 	node.insert(36);
 
-	//display B+Tree
-	cout<<"B+Tree:\n";
-	node.display(node.getRoot());
+// 	//display B+Tree
+// 	cout<<"B+Tree:\n";
+// 	node.display(node.getRoot());
 
-	//display height and num of nodes of B+Tree
-	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	//display height and num of nodes of B+Tree
+// 	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
 	
-	// //test 1: displaying accessed nodes
-	// queue<Node*> q = node.search(5,20);
-	// node.displayAccessedNodes(q);
+// 	// //test 1: displaying accessed nodes
+// 	// queue<Node*> q = node.search(5,20);
+// 	// node.displayAccessedNodes(q);
 
-	// //test 2: displaying accessed nodes
-	// queue<Node*> q = node.search(20,25);
-	// node.displayAccessedNodes(q);
+// 	// //test 2: displaying accessed nodes
+// 	// queue<Node*> q = node.search(20,25);
+// 	// node.displayAccessedNodes(q);
 
-	//test 3: displaying accessed nodes
-	struct returnResults res = node.search(0,9);
-	node.displayAccessedNodes(res.accessedNodesQueue);
+// 	//test 3: displaying accessed nodes
+// 	struct returnResults res = node.search(0,9);
+// 	node.displayAccessedNodes(res.accessedNodesQueue);
 
-	// //test 4: deleting nodes
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// int numOfDeletedNodes = node.remove(36);
-	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
-	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// node.display(node.getRoot());
+// 	// //test 4: deleting nodes
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// int numOfDeletedNodes = node.remove(36);
+// 	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+// 	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// node.display(node.getRoot());
 
-	// // cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// // numOfDeletedNodes = node.remove(26);
-	// // cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
-	// // cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// // node.display(node.getRoot());
+// 	// // cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// // numOfDeletedNodes = node.remove(26);
+// 	// // cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+// 	// // cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// // node.display(node.getRoot());
 
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// numOfDeletedNodes = node.remove(20);
-	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
-	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	// node.display(node.getRoot());
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// numOfDeletedNodes = node.remove(20);
+// 	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+// 	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// node.display(node.getRoot());
 
-	// //size of node
-	// cout<<"Size of 1 Node: " << sizeof(node)<<" bytes\n";
-	// cout<<"size: "<<sizeof(BPTree)<<"bytes";
+// 	// //size of node
+// 	// cout<<"Size of 1 Node: " << sizeof(node)<<" bytes\n";
+// 	// cout<<"size: "<<sizeof(BPTree)<<"bytes";
 	
-	// node.remove(36);
-	// node.display(node.getRoot());
-	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+// 	// node.remove(36);
+// 	// node.display(node.getRoot());
+// 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
 
-	//node.displayRootFirstChild(node.getRoot());
+// 	//node.displayRootFirstChild(node.getRoot());
 
-	return 0;
-}
+// 	return 0;
+// }

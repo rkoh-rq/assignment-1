@@ -1,6 +1,6 @@
 #include "tsv_reader.h"
 #include "storage.h"
-#include "bPlusTree.cpp"
+#include "bPlusTree.h"
 
 #include <cstring>
 #include <math.h>
@@ -8,16 +8,16 @@
 int main() {
     // Get block size
     int block_size = 0;
-    std::cout << "----------------------------------------" <<endl; 
-    std::cout << "Choose the size for a block" <<endl; 
+    std::cout << "----------------------------------------" << std::endl; 
+    std::cout << "Choose the size for a block" <<std::endl; 
 
     int block_choice = 0;
     
     while(block_choice != 1 && block_choice != 2){
-        std::cout << "Select a size: "<<endl; 
-        std::cout << "1: 200B" <<endl;
-        std::cout << "2: 500B" <<endl;
-        cin >> block_choice; 
+        std::cout << "Select a size: "<<std::endl; 
+        std::cout << "1: 200B" <<std::endl;
+        std::cout << "2: 500B" <<std::endl;
+        std::cin >> block_choice; 
 
         if (int(block_choice) == 1){
             block_size = int(200);
@@ -26,8 +26,8 @@ int main() {
             block_size = int(500);
         }
         else{
-            cin.clear();
-            std::cout << "Please select only 1 or 2" <<endl; 
+            std::cin.clear();
+            std::cout << "Please select only 1 or 2" <<std::endl; 
         }
     }
     // Clear buffer(?) 
@@ -54,25 +54,25 @@ int main() {
     */
 
 
-    std::cout << "------------ Experiment 1 ------------ " << endl; 
-    std::cout << "Insert records and count number of blocks and size..." << endl; 
-    std::cout << "Resetting acessed blocks..." << endl; 
+    std::cout << "------------ Experiment 1 ------------ " << std::endl; 
+    std::cout << "Insert records and count number of blocks and size..." << std::endl; 
+    std::cout << "Resetting acessed blocks..." << std::endl; 
     // Reset blocks accessed 
     records_storage.reset_blocks();
     index_storage.reset_blocks();  
 
-    std::cout << "Initialising TSV Reader..." << endl; 
+    std::cout << "Initialising TSV Reader..." << std::endl; 
     // Initialise TSV Reader
     std::string data_file = "data.tsv";
     TSVReader reader = TSVReader(data_file);
 
-    std::cout << "Inserting records..." << endl; 
+    std::cout << "Inserting records..." << std::endl; 
     // Check if last line 
     bool check_end = true;
     while(check_end){
         std::vector<std::string> temp = reader.getNextRow();
         if (temp[0] == ""){
-            std::cout << "Stop Inserting Records..." << endl; 
+            std::cout << "Stop Inserting Records..." << std::endl; 
             check_end = false; 
             break;
         }
@@ -93,17 +93,17 @@ int main() {
     }
 
     // print statistics
-    std::cout << "Statistics of number of blocks and size of database..." << endl; 
+    std::cout << "Statistics of number of blocks and size of database..." << std::endl; 
     int total_blocks = records_storage.get_total_blocks();
-    std::cout << "Total number of blocks: " << total_blocks << endl; 
+    std::cout << "Total number of blocks: " << total_blocks << std::endl; 
     int db_size_used = records_storage.get_actual_size_used(); 
-    std::cout << "Size of database in B: " << db_size_used << endl;
+    std::cout << "Size of database in B: " << db_size_used << std::endl;
 
 
     int blocks_used = records_storage.get_allocated_blocks();
-    std::cout << "Total number of blocks used: " << blocks_used << endl;
+    std::cout << "Total number of blocks used: " << blocks_used << std::endl;
     float total_db_size = db_size_used / pow(10, 6);
-    std::cout << "Size of database in MB: " << total_db_size << endl;
+    std::cout << "Size of database in MB: " << total_db_size << std::endl;
 
     /* 
         -----------------------------------------------------------------------------
@@ -116,8 +116,8 @@ int main() {
         -----------------------------------------------------------------------------
     */
 
-    std::cout << "------------ Experiment 2 ------------ " << endl; 
-    std::cout << "B+ Tree on numVotes and insert records sequentially..." << endl; 
+    std::cout << "------------ Experiment 2 ------------ " << std::endl; 
+    std::cout << "B+ Tree on numVotes and insert records sequentially..." << std::endl; 
 
-
+    return 0;
 }
