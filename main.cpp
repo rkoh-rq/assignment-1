@@ -60,7 +60,7 @@ int main() {
 
     std::cout << "Initialising TSV Reader..." << std::endl; 
     // Initialise TSV Reader
-    std::string data_file = "data.tsv";
+    std::string data_file = "data_small.tsv";
     TSVReader reader = TSVReader(data_file);
 
     std::cout << "Inserting records..." << std::endl; 
