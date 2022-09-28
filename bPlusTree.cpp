@@ -7,14 +7,15 @@
 using namespace std;
 int MAX = 3; // TBC I DONT GET IT int is 4 ptr is 8
 
-struct record {
+struct key_struct {
     int value;
-    vector <void*> vector;
+    vector <void*> add_vector; //to hold the "record ptrs"
 };
+
 
 class Node {
 	bool isLeaf;
-    record *key;
+    key_struct *key;
 	int size;  
 	Node** ptr;
 	friend class BPTree;
@@ -23,30 +24,30 @@ public:
 	Node()
     {
         isLeaf = true;
-	    key = new record[MAX];
+	    key = new key_struct[MAX];
 	    ptr = new Node*[MAX + 1];
     }
 };
 
-
-
 // BP tree
 class BPTree {
 	Node* root;
+	queue<Node*> accessedNodesQueue;
 	void insertInternal(int,Node*,Node*);
-	void removeInternal(int,Node*,Node*);
+	int removeInternal(int,Node*,Node*);
 	Node* findParent(Node*, Node*);
 
 public:
 	BPTree(){
         root = NULL;
     }
-	int search(int,int);
+	struct returnResults search(int,int);
 	void insert(int);
-	void remove(int);
+	int remove(int);
 	// void display(Node*,int,int);
 	void display(Node*);
 	void displayRootFirstChild(Node*);
+	void displayAccessedNodes(queue<Node*>);
 	int getHeight(Node*);
 	int getNumberOfNodes(Node*);
 	Node* getRoot()
@@ -55,7 +56,7 @@ public:
     };
 };
 
-void BPTree::insert(int x)
+void BPTree::insert(int x) 
 {	
 	
 	// If root is null then return
@@ -72,6 +73,23 @@ void BPTree::insert(int x)
 	else {
 		Node* cursor = root;
 		Node* parent;
+
+		// //dup checking THIS IS NOT COMPLETED, INTEGRATION TEAM TO SEE IF NEEDED
+		// queue<Node*> q = search(x,x);
+		// Node *lastAccessedNode = q.back();
+        //     if ( lastAccessedNode != nullptr){
+        //         for(int i = 0; i < lastAccessedNode->size; i++)
+        //         {
+        //             if(lastAccessedNode->key[i].value == x)
+        //             {
+        //                 lastAccessedNode->key[i].dup_vector.push_back(x);
+        //                 break;
+        //             }
+        //         }
+        //         return;
+        //     }
+
+
 		// Till cursor reaches the
 		// leaf node
 		while (cursor->isLeaf == false) {
@@ -94,10 +112,14 @@ void BPTree::insert(int x)
 				}
 			}
 		}
+
+		//integration team
 		// Check for duplicate Keys case - TODO add in the extra pointer to the storage space
 		for (int i = 0; i < cursor->size; i++) {
 			if (cursor->key[i].value == x) {
 				//TODO link to the storage blk idk
+				//sth like
+					// cursor->key[i].add_vector.push_back(revAddress) 
 				return;
 			}
 		}
@@ -197,62 +219,64 @@ void BPTree::insert(int x)
 	}
 }
 
-int BPTree::search(int lowerBound, int upperBound)
+//integration team to update
+struct returnResults{
+		queue<Node*> accessedNodesQueue;
+		// reviewAddress revAdd; // to be impl
+};
+
+returnResults BPTree::search(int lowerBound, int upperBound)
 {
+	struct returnResults res;
     bool found = false;
 	int numAccessed = 0;
+
 	// If tree is empty
 	if (root == NULL) {
 		cout << "Tree is empty\n";
 	}
 
+	//If tree is not empty
 	// Traverse to find the value
 	else {
 
 		Node* cursor = root;
-		// Till we reach leaf node
-		while (cursor->isLeaf == false) {
-
-			if (numAccessed < 5){
-				for (int j = 0; j < cursor->size; j++)
-				{ 
-					cout << cursor->key[j].value << " ";
-				}
-				cout << " || \n";
-			}
+		// Traversing internal nodes till we reach leaf node
+		while (!cursor->isLeaf) {
+			
+			//Counting and pushing nodes accessed to queue
+				//case for traversing internal nodes
 			numAccessed++;
+			res.accessedNodesQueue.push(cursor);
+
+			//for each key in the cursor
 			for (int i = 0; i < cursor->size; i++) {
 				
 				// If the element to be
-				// found is not present
+				// found is in left subtree
 				if (lowerBound < cursor->key[i].value) {
 					cursor = cursor->ptr[i];
+
 					if (cursor->isLeaf){
-						if (numAccessed < 5) {
-						for (int j = 0; j < cursor->size; j++)
-						{ 
-							cout << cursor->key[j].value << " ";
-						}
-						cout << " || \n";
-						}
+						//Counting and pushing nodes accessed to queue
+							//case for 1st leaf node reached
 						numAccessed++;
+						res.accessedNodesQueue.push(cursor);
 					}
 					break;
 				}
 
 				// If reaches end of the
-				// cursor node
+				// cursor node, ie the last key
+				// Go to rightmost child
 				if (i == cursor->size - 1) {
 					cursor = cursor->ptr[i + 1];
+
 					if (cursor->isLeaf){
-						if (numAccessed < 5) {
-						for (int j = 0; j < cursor->size; j++)
-						{ 
-							cout << cursor->key[j].value << " ";
-						}
-						cout << " || \n";
-						}
+						//Counting and pushing nodes accessed to queue
+							//case for 1st leaf node reached
 						numAccessed++;
+						res.accessedNodesQueue.push(cursor);
 					}
 					break;
 				}
@@ -274,17 +298,15 @@ int BPTree::search(int lowerBound, int upperBound)
 				break;
 			}
 			
+			//traverse neighbouring leaf nodes
 			if (i == cursor->size - 1 && cursor->ptr[i+1] != nullptr){
 				cursor = cursor->ptr[i+1];
 				i = -1;
-				if (numAccessed < 5){
-					for (int j = 0; j < cursor->size; j++)
-					{ 
-					cout << cursor->key[j].value << " ";
-					}
-					cout << " || \n";
-				}
+
+				//Counting and pushing nodes accessed to queue
+					//case for traversing neighbouring leaf ndoes
 				numAccessed++;
+				res.accessedNodesQueue.push(cursor);
 			}
 		}
 		// Else element is not present
@@ -292,7 +314,7 @@ int BPTree::search(int lowerBound, int upperBound)
             cout << "Not found\n";
         }
 	}
-	return numAccessed;
+	return res;
 }
 
 
@@ -458,13 +480,15 @@ Node* BPTree::findParent(Node* cursor, Node* child)
 	return parent;
 }
 //remove
-void BPTree::remove(int x)
+int BPTree::remove(int x)
 {
+	int numOfDeletedNodes = 0;
+
 	//if null return empty
 	if(root==NULL)
 	{
 		cout<<"Tree empty\n";
-		return;
+		return numOfDeletedNodes;
 	}
 
 	else
@@ -517,7 +541,7 @@ void BPTree::remove(int x)
 		if(!found) //if key does not exist in that leaf node
 		{
 			cout << "Key does not exist!";
-			return;
+			return numOfDeletedNodes;
 		}
 
 		//deleting the key
@@ -539,10 +563,11 @@ void BPTree::remove(int x)
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
-				cout << "Deleted a node --" <<"\n";
+				numOfDeletedNodes++;
+				cout << "Deleted one node" <<"\n";
 				root = NULL;
 			}
-			return;
+			return numOfDeletedNodes;
 		}
 		cursor->ptr[cursor->size] = cursor->ptr[cursor->size+1];
 		cursor->ptr[cursor->size+1] = NULL;
@@ -556,7 +581,7 @@ void BPTree::remove(int x)
 							break;
 					}
 			}
-			return;
+			return numOfDeletedNodes;
 		}
 
 		//first we try to transfer a key from sibling node
@@ -585,7 +610,7 @@ void BPTree::remove(int x)
 				//update parent
 				parent->key[leftSibling].value = cursor->key[0].value;
 				//cout<<"Transferred "<<cursor->key[0].key_value << " " << cursor->key[0].add_vect[0] <<" from left sibling of leaf node\n";
-				return;
+				return numOfDeletedNodes;
 			}
 		}
 		if(rightSibling <= parent->size)//check if right sibling exist
@@ -612,7 +637,7 @@ void BPTree::remove(int x)
 				//update parent
 				parent->key[rightSibling-1].value = rightNode->key[0].value;
 				//cout<<"Transferred "<<cursor->key[cursor->size-1].key_value <<" "<< cursor->key[cursor->size-1].add_vect[0] <<" from right sibling of leaf node\n";
-				return;
+				return numOfDeletedNodes;
 			}
 		}
 		//must merge and delete a node
@@ -629,10 +654,12 @@ void BPTree::remove(int x)
 			leftNode->ptr[leftNode->size] = cursor->ptr[cursor->size];
 
 			//cout<<"Merging two leaf nodes\n";
-			removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
+			int addDeletedNodes = removeInternal(parent->key[leftSibling].value,parent,cursor);// delete parent node key
+			numOfDeletedNodes += addDeletedNodes;
 			// delete[] cursor->key;
 			// delete[] cursor->ptr;
 			// delete cursor;
+			numOfDeletedNodes++;
 			cout << "Deleted one node" <<"\n";
 		}
 		else if(rightSibling <= parent->size)//if right sibling exist
@@ -647,18 +674,22 @@ void BPTree::remove(int x)
 			cursor->size += rightNode->size;
 			cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
 			//cout<<"Merging two leaf nodes\n";
-			removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
+			int addDeletedNodes = removeInternal(parent->key[rightSibling-1].value,parent,rightNode);// delete parent node key
+			numOfDeletedNodes += addDeletedNodes;
 			// delete[] rightNode->key;
 			// delete[] rightNode->ptr;
 			// delete rightNode;
+			numOfDeletedNodes++;
 			cout << "Deleted one node \n";
 		}
 	}
+	return numOfDeletedNodes;
 }
 
 
-void BPTree::removeInternal(int x, Node* cursor, Node* child)
+int BPTree::removeInternal(int x, Node* cursor, Node* child)
 {
+	int addDeletedNodes = 0; 
 	//deleting the key x first
 	//checking if key from root is to be deleted
 	if(cursor == root)
@@ -670,28 +701,32 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 				delete[] child->key;
 				delete[] child->ptr;
 				delete child;
+				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
 				root = cursor->ptr[0];
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
+				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
 				//cout<<"Changed root node\n";
-				return;
+				return addDeletedNodes;
 			}
 			else if(cursor->ptr[0] == child)
 			{
 				delete[] child->key;
 				delete[] child->ptr;
 				delete child;
+				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
 				root = cursor->ptr[1];
 				delete[] cursor->key;
 				delete[] cursor->ptr;
 				delete cursor;
+				addDeletedNodes++;
 				cout << "Deleted one node" <<"\n";
 				//cout<<"Changed root node\n";
-				return;
+				return addDeletedNodes;
 			}
 		}
 	}
@@ -723,11 +758,12 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 	if(cursor->size >= (MAX+1)/2-1)//no underflow
 	{
 		cout<<"Deleted "<< x << " " <<" from internal node successfully\n";
-		return;
+		return addDeletedNodes;
 	}
 	//cout<<"Underflow in internal node!\n";
 	//underflow, try to transfer first
-	if(cursor==root)return;
+	if( cursor == root )return addDeletedNodes;
+
 	Node* parent = findParent(root, cursor);
 	int leftSibling, rightSibling;
 	//finding left n right sibling of cursor
@@ -766,7 +802,7 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 			cursor->size++;
 			leftNode->size--;
 			//cout<<"Transferred "<<cursor->key[0].key_value<<" "<< x.add_vect[0] <<" from left sibling of internal node\n";
-			return;
+			return addDeletedNodes;
 		}
 	}
 	if(rightSibling <= parent->size)//check if right sibling exist
@@ -792,7 +828,7 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 			cursor->size++;
 			rightNode->size--;
 			//cout<<"Transferred "<<cursor->key[0].key_value << " " << x.add_vect[0] <<" from right sibling of internal node\n";
-			return;
+			return addDeletedNodes;
 		}
 	}
 	//transfer wasnt posssible hence do merging
@@ -813,7 +849,7 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 		leftNode->size += cursor->size+1;
 		cursor->size = 0;
 		//delete cursor
-		removeInternal(parent->key[leftSibling].value, parent, cursor);
+		addDeletedNodes += removeInternal(parent->key[leftSibling].value, parent, cursor);
 		//cout<<"Merged with left sibling\n";
 
 	}
@@ -834,9 +870,10 @@ void BPTree::removeInternal(int x, Node* cursor, Node* child)
 		cursor->size += rightNode->size+1;
 		rightNode->size = 0;
 		//delete cursor
-		removeInternal(parent->key[rightSibling-1].value, parent, rightNode);
+		addDeletedNodes += removeInternal(parent->key[rightSibling-1].value, parent, rightNode);
 		//cout<<"Merged with right sibling\n";
 	}
+	return addDeletedNodes;
 }
 
 
@@ -913,17 +950,38 @@ void BPTree::displayRootFirstChild(Node* cursor){
 	}
 }
 
+/* Displaying all the key values in a single node */
+void BPTree::displayAccessedNodes(queue<Node*> q){
+
+	cout<<"Total Number of Nodes Accessed: " << q.size()<<endl;
+
+	cout<<"Displaying up to first 5 Nodes Accessed:\n";
+
+	int i = 0; 
+	while(!q.empty()  && i < 5){
+
+		Node* temp = q.front();
+		q.pop();
+		i++;
+
+		for (int j = 0; j < temp->size; j++)
+		{ 
+			cout << temp->key[j].value << " ";
+		}
+		cout << " || \n";
+	}
+	
+}
+
 int BPTree::getHeight(Node* cursor){
 	if (cursor == NULL) return 0;
 
-	int height = 0;
+	int height = 1;
 	
 	while (!cursor->isLeaf){
 		cursor = cursor->ptr[0];
 		height++;
 	}
-
-	height++;
 
 	return height;
 }
@@ -960,10 +1018,12 @@ int BPTree::getNumberOfNodes(Node* cursor){
 	return numOfNodes;
 }
 
+
 // Driver Code
 int main()
 {   
     BPTree node;
+	cout<<"Size of BPTree: " << sizeof(node)<<" bytes";
 	// //Initialising B+ Tree
 	// cout<<"==Initialising B+Tree (6,16,26)==\n";
 	// node.insert(6);
@@ -1008,24 +1068,62 @@ int main()
 	node.insert(4);
 	node.insert(7);
 	node.insert(10);
-	node.insert(17);
-	node.insert(19);
+	// node.insert(17);
+	// node.insert(19);
 	node.insert(20);
+	node.insert(21);
 	node.insert(25);
-	node.insert(28);
+	// node.insert(28);
 	node.insert(31);
-	node.insert(5);
-	node.insert(16);
+	// node.insert(5);
+	// node.insert(16);
 
 	// node.insert(6);
 	// node.insert(16);
-	// node.insert(26);
-	// node.insert(36);
+	node.insert(26);
+	node.insert(36);
 
+	//display B+Tree
+	cout<<"B+Tree:\n";
 	node.display(node.getRoot());
+
+	//display height and num of nodes of B+Tree
+	cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	
+	// //test 1: displaying accessed nodes
+	// queue<Node*> q = node.search(5,20);
+	// node.displayAccessedNodes(q);
+
+	// //test 2: displaying accessed nodes
+	// queue<Node*> q = node.search(20,25);
+	// node.displayAccessedNodes(q);
+
+	//test 3: displaying accessed nodes
+	struct returnResults res = node.search(0,9);
+	node.displayAccessedNodes(res.accessedNodesQueue);
+
+	// //test 4: deleting nodes
 	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
-	int numNodesAccessed = node.search(5,20);
-	cout << "Num Nodes Accessed: " << numNodesAccessed;
+	// int numOfDeletedNodes = node.remove(36);
+	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// node.display(node.getRoot());
+
+	// // cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// // numOfDeletedNodes = node.remove(26);
+	// // cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+	// // cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// // node.display(node.getRoot());
+
+	// cout <<"Height: " << node.getHeight(node.getRoot()) <<" Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// numOfDeletedNodes = node.remove(20);
+	// cout << "Number of Deleted Nodes: " << numOfDeletedNodes << endl;
+	// cout <<"New Height: " << node.getHeight(node.getRoot()) <<" New Num of Nodes: " << node.getNumberOfNodes(node.getRoot()) << "\n";
+	// node.display(node.getRoot());
+
+	// //size of node
+	// cout<<"Size of 1 Node: " << sizeof(node)<<" bytes\n";
+	// cout<<"size: "<<sizeof(BPTree)<<"bytes";
 	
 	// node.remove(36);
 	// node.display(node.getRoot());
