@@ -63,7 +63,7 @@ int main() {
 
     std::cout << "Initialising TSV Reader..." << std::endl; 
     // Initialise TSV Reader
-    std::string data_file = "data_small.tsv";
+    std::string data_file = "data.tsv";
     TSVReader reader = TSVReader(data_file);
 
     std::cout << "Inserting records..." << std::endl; 
@@ -119,22 +119,40 @@ int main() {
         bplustree.insert(std::get<1>(record), std::get<0>(record));
     }
     // print statistics
-    std::cout << "Parameter n of B+ Tree: " << 3 << std::endl; 
+    std::cout << "Parameter n of B+ Tree: " << 3 << std::endl; // TODO: Change n to variable depending on size of block
     std::cout << "Number of nodes of the B+ Tree: " << bplustree.getNumberOfNodes(bplustree.getRoot()) << std::endl;
     std::cout << "Height of B+ Tree:  " << bplustree.getHeight(bplustree.getRoot()) << std::endl;
     std::cout << "Content of root node and 1st child node: " << std::endl;
     bplustree.displayRootFirstChild(bplustree.getRoot()) ;
 
+    /* 
+        -----------------------------------------------------------------------------
+            Experiment 4: retrieve those movies with the attribute
+        “numVotes” from 30,000 to 40,000, both inclusively and report the following
+        statistics:
+        - the number and the content of index nodes the process accesses;
+        - the number and the content of data blocks the process accesses;
+        - the average of “averageRating’s” of the records that are returned;
+        -----------------------------------------------------------------------------
+    */
+    std::cout << "------------ Experiment 4 ------------ " << std::endl; 
+    std::cout << "Retrieving movies with numVotes from 30,000 to 40,000" << std::endl;
+    searchResults searchRes = bplustree.search(30000,40000); 
+
+    // print statistics
+    records_storage.reset_blocks(); // can remove later when code is finalized and reset is called properly
+    reviewChain* rc = searchRes.reviewResults;
+    std::cout << "Content of data blocks:" << std::endl;
+    while (rc != NULL){
+        reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
+        std::cout << check.t_const << std::endl;
+        rc = rc->next;
+    }
+    std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
 
     // bplustree.display(bplustree.getRoot());
     // searchResults searchRes = bplustree.search(1000,2000);
-    // reviewChain* rc = searchRes.reviewResults;
-    // std::cout << "Retrieve record:" << std::endl;
-    // while (rc != nullptr){
-    //     reviewRecord check = records_storage.retrieve_record(rc->reviewAddr, record_size);
-    //     std::cout << check.t_const << "\t" << check.num_votes << std::endl;
-    //     rc = rc->next;
-    // }
+    
 
     return 0;
 }

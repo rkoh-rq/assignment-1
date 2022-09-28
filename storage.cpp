@@ -233,11 +233,11 @@ bool Storage::check_iterator(std::size_t record_size){
         is_iterating = true;
     }
 
-    if (iteration_addr.block_add < block_id && iteration_addr.offset >= block_size){
+    if (iteration_addr.block_add < block_id && iteration_addr.offset + record_size >= block_size){
         iteration_addr.block_add += 1;
         iteration_addr.offset = 0;
     }
-    else if (iteration_addr.block_add == block_id && iteration_addr.offset > internal_block_size_used){
+    else if (iteration_addr.block_add == block_id && iteration_addr.offset + record_size >= internal_block_size_used){
         is_iterating = false;
         return false;
     }
