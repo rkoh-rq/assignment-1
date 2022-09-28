@@ -7,25 +7,20 @@
 using namespace std;
 #define MAX 3 // TBC I DONT GET IT int is 4 ptr is 8
 
-struct key_struct {
-    int value;
-    vector <void*> add_vector; //to hold the "record ptrs"
-};
-
 
 class Node {
 	bool isLeaf;
-    key_struct *key;
 	int size;  
 	Node** ptr;
+    int *key;
 	friend class BPTree;
     
 public:
 	Node()
     {
         isLeaf = true;
-	    key = new key_struct[MAX];
 	    ptr = new Node*[MAX + 1];
+	    key = new int[MAX];
     }
 };
 
