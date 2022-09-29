@@ -204,6 +204,12 @@ searchResults BPTree::search(int lowerBound, int upperBound)
 				// found is in left subtree
 				if (lowerBound <= cursor->key[i]) {
 					cursor = cursor->ptr[i].ptr;
+					if (cursor->isLeaf){
+						//Counting and pushing nodes accessed to queue
+							//case for 1st leaf node reached
+						numAccessed++;
+						res.accessedNodesQueue.push(cursor);
+					}
 					break;
 				}
 
@@ -212,6 +218,12 @@ searchResults BPTree::search(int lowerBound, int upperBound)
 				// Go to rightmost child
 				if (i == cursor->size - 1) {
 					cursor = cursor->ptr[i + 1].ptr;
+					if (cursor->isLeaf){
+						//Counting and pushing nodes accessed to queue
+							//case for 1st leaf node reached
+						numAccessed++;
+						res.accessedNodesQueue.push(cursor);
+					}
 					break;
 				}
 			}
