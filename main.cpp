@@ -200,6 +200,15 @@ int main() {
         - Content of root node and its 1st child of updated B+ tree
         -----------------------------------------------------------------------------
     */
+    std::cout << "------------ Experiment 5 ------------ " << std::endl; 
+    std::cout << "Deleting movies with numVotes with attibute 'numVotes' equal to 1000..." << std::endl;
+    int nodesDeleted = bplustree.remove(1000);
+    std::cout << "B+ Tree after deletion" << endl;
+    std::cout << "Number of times that a node is deleted (or two nodes are merged): " << nodesDeleted << std::endl;
+    std::cout << "Number of nodes of the B+ Tree: " << bplustree.getNumberOfNodes(bplustree.getRoot()) << std::endl;
+    std::cout << "Height of B+ Tree:  " << bplustree.getHeight(bplustree.getRoot()) << std::endl;
+    std::cout << "Content of root node and 1st child node: " << std::endl;
+    bplustree.displayRootFirstChild(bplustree.getRoot());
 
     return 0;
 }
