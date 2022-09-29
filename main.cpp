@@ -94,6 +94,7 @@ int main() {
     std::cout << "Total number of blocks used: " << blocks_used << std::endl;
 
     float total_db_size = db_size_used / pow(10, 6);
+     std::cout << "Size of database in B: " << db_size_used << std::endl;
     std::cout << "Size of database in MB: " << total_db_size << std::endl;
 
     /* 
@@ -176,6 +177,7 @@ int main() {
     std::cout << "--- Statistics ---" << std::endl; 
     std::cout << "Content of data blocks:" << std::endl;
     totalAvgRating = 0; 
+    recordCount = 0;
     while (rcExp4 != NULL){
         reviewRecord check = records_storage.retrieve_record(rcExp4->reviewAddr, record_size);
         totalAvgRating += check.avg_rating; 
@@ -187,8 +189,17 @@ int main() {
     std::cout << "Number of data blocks: " << records_storage.reset_blocks() << std::endl;
     std::cout << "Average of average ratings: " << totalAvgRating/recordCount << std::endl;
 
-    // bplustree.display(bplustree.getRoot());
-    // searchResults searchRes = bplustree.search(1000,2000);
+    /* 
+        -----------------------------------------------------------------------------
+        Experiment 5
+        Delete those movies with the attribute "numVotes" equal to 1000, update B+ tree
+        and report:
+        - the number of times that a node is deleted(or two nodes are merged)
+        - the number of nodes in the updated B+ tree
+        - height of updated B+ tree
+        - Content of root node and its 1st child of updated B+ tree
+        -----------------------------------------------------------------------------
+    */
 
     return 0;
 }
