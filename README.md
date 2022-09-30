@@ -5,13 +5,12 @@
 
   For example, if we use the [code runner](https://marketplace.visualstudio.com/items?itemName=formulahendry.code-runner) extension for VSCode, we would add this in `settings.json`:
 
-  ```
+``` 
   "code-runner.executorMap": {ulahendry.code-runner) extension for VSCode, we would add this in `settings.json`:
-
-  ```
+  
     "cpp": "cd $dir && g++ *.cpp -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
   }
-  ```
+```
 
   If we were running C++ using VSCode directly, we would define the `tasks.json` file with corresponding `args` to include all C++ files:
 
